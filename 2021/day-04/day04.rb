@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'matrix'
-require 'ostruct'
 
 def read_file(*args)
   File.read(File.join(File.absolute_path(''), *args))
