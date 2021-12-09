@@ -18,30 +18,28 @@ module Day04
     end
 
     def solve
-      @numbers.each do |bingo_number|
-        board_number = find_bingo(bingo_number)
-
-        next if board_number.nil?
-
-        return sum_board(bingo_number, board_number)
-      end
+      solve_problem 1
     end
 
     def solve2
-      @numbers.each do |bingo_number|
-        board_number = find_bingo(bingo_number)
-
-        next if board_number.nil?
-
-        @boards_left[board_number] = 1
-
-        next unless @boards_left.sum == @boards_left.size
-
-        return sum_board(bingo_number, board_number)
-      end
+      solve_problem @boards_left.size
     end
 
     private
+
+    def solve_problem(required_bingos)
+      @numbers.each do |bingo_number|
+        board_numbers = find_bingo(bingo_number)
+
+        next if board_numbers.empty?
+
+        board_numbers.each { |board_number| @boards_left[board_number] = 1 }
+
+        next unless @boards_left.sum == required_bingos
+
+        return sum_board(bingo_number, board_numbers.last)
+      end
+    end
 
     def sum_board(bingo_number, board_number)
       sum = 0
@@ -57,29 +55,28 @@ module Day04
       positions = []
 
       @data.each_index do |inx|
+        next if winning_board?(inx)
+
         (0...5).each do |i|
           (0...5).each do |j|
             next unless @data[inx][i, j] == bingo_number
 
             @visited[inx][i, j] = 1
-            positions.append OpenStruct.new(i: i, j: j, m: inx)
+
+            positions.append inx if winning_board?(inx)
           end
         end
       end
-      positions.each do |pos|
-        row_bingo = @visited[pos.m][pos.i, 0] +
-          @visited[pos.m][pos.i, 1] +
-          @visited[pos.m][pos.i, 2] +
-          @visited[pos.m][pos.i, 3] +
-          @visited[pos.m][pos.i, 4] == 5
-        column_bingo = @visited[pos.m][0, pos.j] +
-          @visited[pos.m][1, pos.j] +
-          @visited[pos.m][2, pos.j] +
-          @visited[pos.m][3, pos.j] +
-          @visited[pos.m][4, pos.j] == 5
-        return pos.m if row_bingo || column_bingo
+      positions
+    end
+
+    def winning_board?(inx)
+      (0...5).each do |z|
+        if (0...5).map { |x| @visited[inx][z, x] }.sum == 5 || (0...5).map { |x| @visited[inx][x, z] }.sum == 5
+          return true
+        end
       end
-      nil
+      false
     end
 
     def parse_content(content)
