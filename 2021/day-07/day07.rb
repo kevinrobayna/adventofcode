@@ -18,7 +18,8 @@ module Day07
     end
 
     def solve2
-      costs = [average(@content).floor, average(@content).round].map do |avg|
+      average = average(@content)
+      costs = [average.floor, average.round].map do |avg|
         movements = @content.map do |x|
           steps = (x - avg).abs
           extra = steps.times.map { |y| y }.sum
