@@ -48,7 +48,7 @@ module Day06
     end
 
     def parse_content(content)
-      content.split("\n")[0].split(',').map(&:to_i)
+      content.split("\n").first.split(',').map(&:to_i)
     end
   end
 end
