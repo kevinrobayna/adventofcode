@@ -32,14 +32,14 @@ module Day10
         openings.append next_char
         find_invalid_char(expression, openings, next_pos)
       elsif expected_closings.include? next_char
-        # remove 1 occurence of next_char from openings
+        openings = openings.delete_at(openings.index(get_opening(next_char)))
         find_invalid_char(expression, openings, next_pos)
       elsif !expected_closings.include? next_char
         next_char
       end
     end
 
-    def calculate_points(char)
+    def calculate_score(char)
       case char
       when ')'
         3
@@ -50,11 +50,11 @@ module Day10
       when '>'
         25_137
       else
-        raise ArgumentError
+        0
       end
     end
 
-    def get_openings(char)
+    def get_opening(char)
       case char
       when ')'
         '('
