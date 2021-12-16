@@ -14,8 +14,8 @@ module Day10
 
     def solve
       @content.each_index.map do |expression|
-        find_invalid_char(expression, [@content.first.first], 0)
-      end
+        find_invalid_char(expression, [@content[expression].first], 0)
+      end.sum
     end
 
     def solve2
@@ -26,16 +26,25 @@ module Day10
 
     def find_invalid_char(expression, openings, position)
       next_pos = position + 1
-      next_char = @content[expression][next_pos]
-      expected_closings = openings.map { |x| get_closings(x) }
-      if is_opening? next_char
-        openings.append next_char
+      found = @content[expression][next_pos] || 'END'
+      expected = get_closings(openings.last)
+      if is_opening? found
+        openings.append found
         find_invalid_char(expression, openings, next_pos)
-      elsif expected_closings.include? next_char
-        openings = openings.delete_at(openings.index(get_opening(next_char)))
+      elsif expected == found
+        openings.delete_at(openings.size - 1)
         find_invalid_char(expression, openings, next_pos)
-      elsif !expected_closings.include? next_char
-        next_char
+      else
+        chars_until_now = (0...next_pos).map { |x| @content[expression][x] }.join
+        chars_until_end = ((next_pos + 1)...(@content[expression].size)).map { |x| @content[expression][x] }.join
+        colored_found = "\e[0;31m#{found}\e[0m"
+        points = calculate_score(found)
+        if found == 'END'
+          puts "#{expression} - #{chars_until_now}\e Expected #{expected}, but found #{colored_found} instead"
+        else
+          puts "#{expression} - #{chars_until_now}#{colored_found}#{chars_until_end} Expected #{expected}, but found #{found} instead. Points: #{points}"
+        end
+        points
       end
     end
 
@@ -44,7 +53,7 @@ module Day10
       when ')'
         3
       when ']'
-        5
+        57
       when '}'
         1197
       when '>'
@@ -80,7 +89,7 @@ module Day10
       when '<'
         '>'
       else
-        raise ArgumentError
+        'END'
       end
     end
 
