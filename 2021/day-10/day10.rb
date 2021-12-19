@@ -103,8 +103,8 @@ module Day10
   end
 end
 
-test = read_file('test.txt')
-real = read_file('input.txt')
+test = read_file('2021/day-10/test.txt')
+real = read_file('2021/day-10/input.txt')
 
 puts 'Part1 Test', Day10::Solver.new(test).solve
 puts 'Part1', Day10::Solver.new(real).solve

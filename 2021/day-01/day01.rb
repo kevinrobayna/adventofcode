@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 def read_file(*args)
-  File.read(File.join(File.absolute_path(''), *args))
+  File.read(File.join(File.absolute_path('.'), *args))
 end
 
 module Day01
@@ -48,8 +48,8 @@ module Day01
   end
 end
 
-test = read_file('test.txt')
-real = read_file('input.txt')
+test = read_file('2021/day-01/test.txt')
+real = read_file('2021/day-01/input.txt')
 
 puts 'Part1 Test', Day01::Solver.new(test).solve
 puts 'Part1', Day01::Solver.new(real).solve

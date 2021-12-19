@@ -1,10 +1,12 @@
 import java.util.stream.Collectors
 import java.io.File
 import kotlin.String
+import java.nio.file.Paths
 
 
 fun readFile(filename: String): List<String> {
-    return File(filename).useLines { it.toList() }
+    val path = Paths.get(filename).toAbsolutePath().toString()
+    return File(path).useLines { it.toList() }
 }
 
 class Day1(
@@ -59,8 +61,8 @@ class Day1(
 }
 
 
-val test = readFile("test.txt")
-val real = readFile("input.txt")
+val test = readFile("2020/day-01/test.txt")
+val real = readFile("2020/day-01/input.txt")
 
 
 println("Part1 Test ${Day1(test).solve()}")
