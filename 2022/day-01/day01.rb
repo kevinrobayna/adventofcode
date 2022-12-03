@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+def compare_solutions(expected, actual)
+  raise "Expected #{expected} but got #{actual}" unless expected == actual
+end
+
 def read_file(*args)
   File.read(File.join(File.absolute_path('.'), *args))
 end
@@ -26,8 +30,8 @@ def get_sorted_snacks(filename)
   sums.sort
 end
 
-puts 'Part1 Test', solve('2022/day-01/test.txt')
-puts 'Part1 Real', solve('2022/day-01/input.txt')
+compare_solutions(24000, solve('2022/day-01/test.txt'))
+puts 'Part1', solve('2022/day-01/input.txt')
 
-puts 'Part2 Test', solve2('2022/day-01/test.txt')
-puts 'Part2 Real', solve2('2022/day-01/input.txt')
+compare_solutions(45000, solve2('2022/day-01/test.txt'))
+puts 'Part2', solve2('2022/day-01/input.txt')

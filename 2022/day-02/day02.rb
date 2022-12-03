@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+def compare_solutions(expected, actual)
+  raise "Expected #{expected} but got #{actual}" unless expected == actual
+end
+
 def read_file(*args)
   File.read(File.join(File.absolute_path('.'), *args))
 end
@@ -13,24 +17,23 @@ LOSE = 0
 DRAW = 3
 
 TRANSLATION = {
-  "A" => 0,
-  "X" => 0,
+  'A' => 0,
+  'X' => 0,
 
-  "B" => 1,
-  "Y" => 1,
+  'B' => 1,
+  'Y' => 1,
 
-  "C" => 2,
-  "Z" => 2,
-}
+  'C' => 2,
+  'Z' => 2
+}.freeze
 
 POINTS = [
   [DRAW, WIN, LOSE],
   [LOSE, DRAW, WIN],
   [WIN, LOSE, DRAW]
-]
+].freeze
 
 def solve(filename)
-
   hands = read_file(filename).split("\n").map do |line|
     opponent, yours = line.split(' ')
 
@@ -65,9 +68,8 @@ def solve2(filename)
   hands.sum
 end
 
-puts 'Part1 Test', solve('2022/day-02/test.txt')
-puts 'Part1 Real', solve('2022/day-02/input.txt')
+compare_solutions(15, solve('2022/day-02/test.txt'))
+puts 'Part1', solve('2022/day-02/input.txt')
 
-puts 'Part2 Test', solve2('2022/day-02/test.txt')
-puts 'Part2 Real', solve2('2022/day-02/input.txt')
-
+compare_solutions(12, solve2('2022/day-02/test.txt'))
+puts 'Part2', solve2('2022/day-02/input.txt')
