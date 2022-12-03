@@ -30,8 +30,8 @@ def get_sorted_snacks(filename)
   sums.sort
 end
 
-compare_solutions(24000, solve('2022/day-01/test.txt'))
+compare_solutions(24_000, solve('2022/day-01/test.txt'))
 puts 'Part1', solve('2022/day-01/input.txt')
 
-compare_solutions(45000, solve2('2022/day-01/test.txt'))
+compare_solutions(45_000, solve2('2022/day-01/test.txt'))
 puts 'Part2', solve2('2022/day-01/input.txt')

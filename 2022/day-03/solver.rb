@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
+def self.compare_solutions(expected, actual)
   raise "Expected #{expected} but got #{actual}" unless expected == actual
 end
 
-def read_file(*args)
+def self.read_file(*args)
   File.read(File.join(File.absolute_path('.'), *args))
 end
 
