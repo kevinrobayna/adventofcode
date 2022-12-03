@@ -13,7 +13,7 @@ def solve(filename)
   gamma = ''
   epsilon = ''
   (0...content.first.length).each do |index|
-    zeros, ones = find_most_common_digit_in_column(content, index)
+    zeros, ones = find_most_common_digits(content, index)
     if zeros > ones
       gamma << '0'
       epsilon << '1'
@@ -29,7 +29,7 @@ end
 def solve2(filename)
   possible_ox_rates = read_file(filename).split("\n")
   (0...possible_ox_rates.first.length).each do |index|
-    zeros, ones = find_most_common_digit_in_column(possible_ox_rates, index)
+    zeros, ones = find_most_common_digits(possible_ox_rates, index)
     if ones >= zeros
       possible_ox_rates.select! { |num| num[index].to_i.eql?(1) }
     else
@@ -39,7 +39,7 @@ def solve2(filename)
 
   possible_co2_rates = read_file(filename).split("\n")
   (0...possible_co2_rates.first.length).each do |index|
-    zeros, ones = find_most_common_digit_in_column(possible_co2_rates, index)
+    zeros, ones = find_most_common_digits(possible_co2_rates, index)
     if ones < zeros
       possible_co2_rates.select! { |num| num[index].to_i.eql?(1) }
     elsif zeros < ones
@@ -57,7 +57,7 @@ def solve2(filename)
   oxygen.to_i(2) * co2.to_i(2)
 end
 
-def find_most_common_digit_in_column(values, index)
+def find_most_common_digits(values, index)
   zeros = values.count { |element| element[index].to_i.zero? }
   [zeros, (values.count - zeros).abs]
 end
