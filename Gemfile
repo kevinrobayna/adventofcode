@@ -2,6 +2,8 @@
 
 source 'https://rubygems.org'
 
+gem 'matrix'
+
 group :development do
   gem 'rubocop'
   gem 'solargraph'
