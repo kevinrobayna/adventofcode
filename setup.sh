@@ -33,10 +33,10 @@ def solve2(filename)
   0
 end
 
-compare_solutions(0, solve('2022/day-03/test.txt'))
-puts 'Part1', solve('2022/day-03/input.txt')
+compare_solutions(0, solve('$year/day-$day/test.txt'))
+puts 'Part1', solve('$year/day-$day/input.txt')
 
-compare_solutions(0, solve2('2022/day-03/test.txt'))
-puts 'Part2', solve2('2022/day-03/input.txt')
+compare_solutions(0, solve2('$year/day-$day/test.txt'))
+puts 'Part2', solve2('$year/day-$day/input.txt')
 EOF
 fi
