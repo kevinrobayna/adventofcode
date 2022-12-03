@@ -1,10 +1,11 @@
+# The below rules are disabled because my aim for this code is not to be "Clean Code" but does it solve the problem.
+# Others might want to solve the AoC with super nice code but that isn't my goal.
+
 Metrics/AbcSize:
   Enabled: false
 
-
 Metrics/MethodLength:
   Enabled: false
-
 
 Metrics/CyclomaticComplexity:
   Enabled: false
