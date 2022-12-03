@@ -1,4 +1,4 @@
-
+# rubocop:disable Style/FrozenStringLiteralComment
 
 def compare_solutions(expected, actual)
   raise "Expected #{expected} but got #{actual}" unless expected == actual
@@ -67,3 +67,5 @@ puts 'Part1', solve('2021/day-03/input.txt')
 
 compare_solutions(230, solve2('2021/day-03/test.txt'))
 puts 'Part2', solve2('2021/day-03/input.txt')
+
+# rubocop:enable Style/FrozenStringLiteralComment
