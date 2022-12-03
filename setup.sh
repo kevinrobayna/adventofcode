@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 year=$(date +"%Y")
 day=$(date +"%d")
