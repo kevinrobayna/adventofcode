@@ -17,7 +17,7 @@ def solve2(filename)
 end
 
 def last_inx_with_n_unique_chars(n_chars, content)
-  content.each_char.each_with_index do |_char, index|
+  content.chars.each_index do |index|
     next if index < n_chars
 
     sequence = content[(index - n_chars)...index]
