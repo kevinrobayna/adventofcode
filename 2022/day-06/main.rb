@@ -9,19 +9,19 @@ def read_file(*args)
 end
 
 def solve(filename)
-  last_inx_with_n_unique_chars(4, read_file(filename))
+  find_position_with_n_unique_chars(4, read_file(filename))
 end
 
 def solve2(filename)
-  last_inx_with_n_unique_chars(14, read_file(filename))
+  find_position_with_n_unique_chars(14, read_file(filename))
 end
 
-def last_inx_with_n_unique_chars(n_chars, content)
+def find_position_with_n_unique_chars(number_of_unique_chars, content)
   content.chars.each_index do |index|
-    next if index < n_chars
+    next if index < number_of_unique_chars
 
-    sequence = content[(index - n_chars)...index]
-    return index if sequence.chars.uniq.length == n_chars
+    sequence = content[(index - number_of_unique_chars)...index]
+    return index if sequence.chars.uniq.length == number_of_unique_chars
   end
   raise 'No solution found'
 end
