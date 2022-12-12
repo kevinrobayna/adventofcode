@@ -9,17 +9,30 @@ def read_file(*args)
 end
 
 def solve(filename)
-  read_file(filename)
-  0
+  parse_input(filename).sum
 end
 
 def solve2(filename)
-  read_file(filename)
-  0
+  floor = 0
+  parse_input(filename).each_with_index do |value, id|
+    return id + 1 if floor + value == -1
+
+    floor += value
+  end
 end
 
-compare_solutions(0, solve('2015/day-01/test.txt'))
+def parse_input(filename)
+  read_file(filename).each_char.map do |char|
+    if char == '('
+      1
+    else
+      -1
+    end
+  end
+end
+
+compare_solutions(-1, solve('2015/day-01/test.txt'))
 puts 'Part1', solve('2015/day-01/input.txt')
 
-compare_solutions(0, solve2('2015/day-01/test.txt'))
+compare_solutions(5, solve2('2015/day-01/test.txt'))
 puts 'Part2', solve2('2015/day-01/input.txt')
