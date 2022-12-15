@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'matrix'
-require 'ostruct'
 
 def compare_solutions(expected, actual)
   raise "Expected #{expected} but got #{actual}" unless expected == actual
