@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'ostruct'
+require 'set'
 
 def compare_solutions(expected, actual)
   raise "Expected #{expected} but got #{actual}" unless expected == actual
@@ -25,67 +25,54 @@ def solve2(filename)
   calculate_tail_positions(filename, 10)
 end
 
-def calculate_tail_positions(filename, number_of_knots)
-  positions = number_of_knots.times.map do
+def calculate_tail_positions(filename, knots)
+  positions = knots.times.map do
     [0, 0]
   end
-  tail_positions = [positions.last]
+  tail_positions = Set[positions.last]
 
   read_file(filename).each_line.map do |line|
     direction, movement = line.split(' ')
     movement.to_i.times do
-      next_positions = positions.map.with_index do |_, inx|
-        next_movement(direction, inx, positions)
+      positions.each.with_index do |_, inx|
+        positions[inx] = if inx.zero?
+                           head = positions[inx]
+                           move(direction, head)
+                         else
+                           head = positions[inx - 1]
+                           tail = positions[inx]
+                           follow(head, tail)
+                         end
       end
-      positions = next_positions
-      tail_positions << positions.last
+      tail_positions.add(positions.last)
     end
   end
-
-  tail_positions.uniq.size
+  tail_positions.size
 end
 
-def next_movement(direction, inx, positions)
-  if inx.zero?
-    next_x, next_y = MOVEMENTS[direction]
-    head_x, head_y = positions[inx]
-    [head_x + next_x, head_y + next_y]
-  else
-    next_head = next_movement(direction, inx - 1, positions)
-    # This is currently not working
-    # Step 0
-    # ......
-    # ......
-    # ......
-    # ....H.
-    # 4321..  (4 covers 5, 6, 7, 8, 9, s)
-    # Step 1
-    # ......
-    # ......
-    # ....H.
-    # .4321.
-    # 5.....  (5 covers 6, 7, 8, 9, s)
-    #
-    # Our result is different
-    # ......
-    # ......
-    # ....H.
-    # ....1.
-    # 5432..  (5 covers 6, 7, 8, 9, s)
-    #
-    # Our logic sees that the distance from 2 to 1 is 1.42 so because is bellow 2 it won't move.
-    if distance(next_head, positions[inx]) > 1
-      positions[inx - 1]
-    else
-      positions[inx]
-    end
-  end
+def move(direction, knot)
+  next_x, next_y = MOVEMENTS[direction]
+  knot_x, knot_y = knot
+  [knot_x + next_x, knot_y + next_y]
 end
 
-def distance(head, tail)
+def follow(head, tail)
   head_x, head_y = head
   tail_x, tail_y = tail
-  Math.sqrt((head_x - tail_x) ** 2 + (head_y - tail_y) ** 2).floor
+  distance = [(head_x - tail_x).abs, (head_y - tail_y).abs].max
+
+  # Move tail to follow head
+  # Since we are moving each position at the time, one node can be:
+  #   0 steps away -> no movement
+  #   1 or 2 steps away (ahead) -> move towards on the same axis (x++ or y++)
+  #   -1 or -2 steps away (behind) -> move behind on the same axis (x-- or y--)
+  return tail if distance <= 1
+
+  move_x = head_x - tail_x
+  move_y = head_y - tail_y
+  next_x = move_x.abs == 2 ? move_x / 2 : move_x
+  next_y = move_y.abs == 2 ? move_y / 2 : move_y
+  [tail_x + next_x, tail_y + next_y]
 end
 
 compare_solutions(13, solve('2022/day-09/test.txt'))
