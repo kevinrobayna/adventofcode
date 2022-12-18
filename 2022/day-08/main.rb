@@ -4,6 +4,8 @@ require 'matrix'
 
 def compare_solutions(expected, actual)
   raise "Expected #{expected} but got #{actual}" unless expected == actual
+
+  puts "Congratulations! Got expected result (#{expected})"
 end
 
 def read_file(*args)
