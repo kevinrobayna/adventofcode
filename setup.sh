@@ -2,7 +2,7 @@
 set -e
 
 year=$(date +"%Y")
-day="11"
+day=$(date +"%d")
 
 aoc-to-markdown -y $year -d $day -o $year -i
 
