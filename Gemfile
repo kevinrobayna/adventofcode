@@ -6,5 +6,4 @@ gem 'matrix'
 
 group :development do
   gem 'rubocop'
-  gem 'solargraph'
 end

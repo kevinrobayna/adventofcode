@@ -4,7 +4,8 @@ set -e
 year=$(date +"%Y")
 day=$(date +"%d")
 
-aoc-to-markdown -y $year -d $day -o $year -i
+# Forked the package to fix a few bugs, but i still having pushed it to PyPi
+python3 ~/dev/aoc-to-md/aoc_to_md.py -y $year -d $day -o $year -i
 
 FILE=./$year/day-$day/main.py
 echo "AoC: Setting up day $day in $year"
