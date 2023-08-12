@@ -1,18 +1,3 @@
-#!/bin/bash
-set -e
-
-year=$(date +"%Y")
-day=$(date +"%d")
-
-aoc-to-markdown -y $year -d $day -o $year -i
-
-FILE=./$year/day-$day/main.py
-echo "AoC: Setting up day $day in $year"
-if [ -f "$FILE" ]; then
-  echo "AoC: $FILE already exists. Skipping."
-else
-  echo "AoC: Creating template file for day $day in $year"
-  cat <<EOF >$FILE
 from pathlib import Path
 
 
@@ -29,10 +14,26 @@ def read_file(filename):
 
 def part1(filename):
     """Solve part 1."""
+    return sum(map(char_to_value, list(read_file(filename))))
 
 
 def part2(filename):
     """Solve part 2."""
+    values = map(char_to_value, list(read_file(filename)))
+    floor = 0
+    for idx, x in enumerate(values):
+        if floor + x == -1:
+            return idx + 1
+        floor += x
+
+    return floor
+
+
+def char_to_value(char):
+    if char == '(':
+        return 1
+    else:
+        return -1
 
 
 if __name__ == "__main__":
@@ -41,6 +42,3 @@ if __name__ == "__main__":
 
     compare_solutions(5, part2('test.txt'))
     print(f"Part2, {part2('input.txt')}")
-
-EOF
-fi
