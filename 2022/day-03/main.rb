@@ -1,11 +1,16 @@
 # frozen_string_literal: true
 
-def self.compare_solutions(expected, actual)
+def compare_solutions(expected, actual)
   raise "Expected #{expected} but got #{actual}" unless expected == actual
+
+  puts "Congratulations! Got expected result (#{expected})"
 end
 
-def self.read_file(*args)
-  File.read(File.join(File.absolute_path('.'), *args))
+def read_file(filename)
+  # Get the directory of the currently executing script
+  # Join the script directory with the filename
+  # Read the content of the file
+  File.read(File.join(__dir__, filename))
 end
 
 ALPHABET = ('a'..'z').to_a + ('A'..'Z').to_a
