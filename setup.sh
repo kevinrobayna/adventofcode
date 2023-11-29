@@ -7,41 +7,43 @@ day=$(date +"%d")
 # Forked the package to fix a few bugs, but i still having pushed it to PyPi
 python3 ~/dev/aoc-to-md/aoc_to_md.py -y $year -d $day -o $year -i
 
-FILE=./$year/day-$day/main.py
+FILE=./$year/day-$day/main.rb
 echo "AoC: Setting up day $day in $year"
 if [ -f "$FILE" ]; then
-  echo "AoC: $FILE already exists. Skipping."
+	echo "AoC: $FILE already exists. Skipping."
 else
-  echo "AoC: Creating template file for day $day in $year"
-  cat <<EOF >$FILE
-from pathlib import Path
+	echo "AoC: Creating template file for day $day in $year"
+	cat <<EOF >$FILE
+# frozen_string_literal: true
 
+def compare_solutions(expected, actual)
+  raise "Expected #{expected} but got #{actual}" unless expected == actual
 
-def compare_solutions(expected, actual):
-    if expected != actual:
-        raise Exception(f"Expected #{expected} but got #{actual}")
+  puts "Congratulations! Got expected result (#{expected})"
+end
 
-    print(f"Congratulations! Got expected result ({expected})")
+def read_file(filename)
+  # Get the directory of the currently executing script
+  # Join the script directory with the filename
+  # Read the content of the file
+  File.read(File.join(__dir__, filename))
+end
 
+def solve(filename)
+  read_file(filename)
+  0
+end
 
-def read_file(filename):
-    return Path(__file__).parent.joinpath(filename).read_text()
+def solve2(filename)
+  read_file(filename)
+  0
+end
 
+compare_solutions(0, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-def part1(filename):
-    """Solve part 1."""
-
-
-def part2(filename):
-    """Solve part 2."""
-
-
-if __name__ == "__main__":
-    compare_solutions(-1, part1('test.txt'))
-    print(f"Part1, {part1('input.txt')}")
-
-    compare_solutions(5, part2('test.txt'))
-    print(f"Part2, {part2('input.txt')}")
+compare_solutions(0, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')
 
 EOF
 fi
