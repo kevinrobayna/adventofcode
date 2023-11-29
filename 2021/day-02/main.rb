@@ -56,8 +56,8 @@ def parse_content(filename)
   end
 end
 
-compare_solutions(150, solve('2021/day-02/test.txt'))
-puts 'Part1', solve('2021/day-02/input.txt')
+compare_solutions(150, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(900, solve2('2021/day-02/test.txt'))
-puts 'Part2', solve2('2021/day-02/input.txt')
+compare_solutions(900, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

@@ -37,8 +37,8 @@ def find_matching_char(slice)
   hash.select { |_k, v| v.positive? }.keys.first
 end
 
-compare_solutions(157, solve('2022/day-03/test.txt'))
-puts 'Part1', solve('2022/day-03/input.txt')
+compare_solutions(157, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(70, solve2('2022/day-03/test.txt'))
-puts 'Part2', solve2('2022/day-03/input.txt')
+compare_solutions(70, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

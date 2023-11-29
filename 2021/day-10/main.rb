@@ -95,8 +95,8 @@ def opening?(char)
   %w|( [ { <|.include? char
 end
 
-compare_solutions(26_397, solve('2021/day-10/test.txt'))
-puts 'Part1', solve('2021/day-10/input.txt')
+compare_solutions(26_397, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(288_957, solve2('2021/day-10/test.txt'))
-puts 'Part2', solve2('2021/day-10/input.txt')
+compare_solutions(288_957, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

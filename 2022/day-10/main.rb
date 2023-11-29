@@ -166,8 +166,8 @@ def instructions(filename)
   end
 end
 
-compare_solutions(13_140, solve('2022/day-10/test.txt'))
-puts 'Part1', solve('2022/day-10/input.txt')
+compare_solutions(13_140, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
 expected = "##..##..##..##..##..##..##..##..##..##..
 ###...###...###...###...###...###...###.
@@ -175,5 +175,5 @@ expected = "##..##..##..##..##..##..##..##..##..##..
 #####.....#####.....#####.....#####.....
 ######......######......######......####
 #######.......#######.......#######....."
-compare_solutions(expected, solve2('2022/day-10/test.txt'))
-puts 'Part2', solve2('2022/day-10/input.txt')
+compare_solutions(expected, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

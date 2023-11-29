@@ -75,8 +75,8 @@ def build_solution(columns)
   columns.sort.to_h.map { |_, value| value.first }.join
 end
 
-compare_solutions('CMZ', solve('2022/day-05/test.txt'))
-puts 'Part1', solve('2022/day-05/input.txt')
+compare_solutions('CMZ', solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions('MCD', solve2('2022/day-05/test.txt'))
-puts 'Part2', solve2('2022/day-05/input.txt')
+compare_solutions('MCD', solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

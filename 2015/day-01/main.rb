@@ -36,8 +36,8 @@ def parse_input(filename)
   end
 end
 
-compare_solutions(-1, solve('2015/day-01/test.txt'))
-puts 'Part1', solve('2015/day-01/input.txt')
+compare_solutions(-1, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(5, solve2('2015/day-01/test.txt'))
-puts 'Part2', solve2('2015/day-01/input.txt')
+compare_solutions(5, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

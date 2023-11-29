@@ -23,8 +23,8 @@ def solve2(filename)
   0
 end
 
-compare_solutions(0, solve('2017/day-20/test.txt'))
-puts 'Part1', solve('2017/day-20/input.txt')
+compare_solutions(0, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(0, solve2('2017/day-20/test.txt'))
-puts 'Part2', solve2('2017/day-20/input.txt')
+compare_solutions(0, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

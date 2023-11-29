@@ -38,8 +38,8 @@ def solve2(filename)
   end.sum
 end
 
-compare_solutions(2, solve('2022/day-04/test.txt'))
-puts 'Part1', solve('2022/day-04/input.txt')
+compare_solutions(2, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(4, solve2('2022/day-04/test.txt'))
-puts 'Part2', solve2('2022/day-04/input.txt')
+compare_solutions(4, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

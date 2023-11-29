@@ -149,8 +149,8 @@ def solve2(filename)
   inspected_items[0] * inspected_items[1]
 end
 
-compare_solutions(10_605, solve('2022/day-11/test.txt'))
-puts 'Part1', solve('2022/day-11/input.txt')
+compare_solutions(10_605, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(2_713_310_158, solve2('2022/day-11/test.txt'))
-puts 'Part2', solve2('2022/day-11/input.txt')
+compare_solutions(2_713_310_158, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

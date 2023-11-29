@@ -133,8 +133,8 @@ def find_shortest_path(grid, start, finish)
   end
 end
 
-compare_solutions(31, solve('2022/day-12/test.txt'))
-puts 'Part1', solve('2022/day-12/input.txt')
+compare_solutions(31, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(29, solve2('2022/day-12/test.txt'))
-puts 'Part2', solve2('2022/day-12/input.txt')
+compare_solutions(29, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

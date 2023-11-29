@@ -90,9 +90,9 @@ def calculate_tail_positions(filename, knot_count)
   knots.last.steps
 end
 
-compare_solutions(13, solve('2022/day-09/test.txt'))
-puts 'Part1', solve('2022/day-09/input.txt')
+compare_solutions(13, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(1, solve2('2022/day-09/test.txt'))
-compare_solutions(36, solve2('2022/day-09/test2.txt'))
-puts 'Part2', solve2('2022/day-09/input.txt')
+compare_solutions(1, solve2('test.txt'))
+compare_solutions(36, solve2('test2.txt'))
+puts 'Part2', solve2('input.txt')

@@ -67,10 +67,10 @@ def find_most_common_digits(values, index)
   [zeros, (values.count - zeros).abs]
 end
 
-compare_solutions(198, solve('2021/day-03/test.txt'))
-puts 'Part1', solve('2021/day-03/input.txt')
+compare_solutions(198, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(230, solve2('2021/day-03/test.txt'))
-puts 'Part2', solve2('2021/day-03/input.txt')
+compare_solutions(230, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')
 
 # rubocop:enable Style/FrozenStringLiteralComment

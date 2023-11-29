@@ -102,8 +102,8 @@ def traverse_tree(root)
   end
 end
 
-compare_solutions(95_437, solve('2022/day-07/test.txt'))
-puts 'Part1', solve('2022/day-07/input.txt')
+compare_solutions(95_437, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(24_933_642, solve2('2022/day-07/test.txt'))
-puts 'Part2', solve2('2022/day-07/input.txt')
+compare_solutions(24_933_642, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

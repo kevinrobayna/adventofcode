@@ -73,8 +73,8 @@ def solve2(filename)
   hands.sum
 end
 
-compare_solutions(15, solve('2022/day-02/test.txt'))
-puts 'Part1', solve('2022/day-02/input.txt')
+compare_solutions(15, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(12, solve2('2022/day-02/test.txt'))
-puts 'Part2', solve2('2022/day-02/input.txt')
+compare_solutions(12, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

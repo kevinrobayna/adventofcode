@@ -99,8 +99,8 @@ def solve2(filename)
   div_one * div_two
 end
 
-compare_solutions(13, solve('2022/day-13/test.txt'))
-puts 'Part1', solve('2022/day-13/input.txt')
+compare_solutions(13, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(140, solve2('2022/day-13/test.txt'))
-puts 'Part2', solve2('2022/day-13/input.txt')
+compare_solutions(140, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

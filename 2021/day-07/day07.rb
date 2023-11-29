@@ -45,8 +45,8 @@ module Day07
   end
 end
 
-test = read_file('2021/day-07/test.txt')
-real = read_file('2021/day-07/input.txt')
+test = read_file('test.txt')
+real = read_file('input.txt')
 
 puts 'Part1 Test', Day07::Solver.new(test).solve
 puts 'Part1', Day07::Solver.new(real).solve
