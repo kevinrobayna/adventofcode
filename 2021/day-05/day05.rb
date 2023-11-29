@@ -8,9 +8,7 @@ def read_file(*args)
 end
 
 module Day05
-
   class Solver
-
     def initialize(content)
       @content = parse_content(content)
       max_x = max_y = 0
@@ -80,5 +78,3 @@ puts 'Part1 Test', Day05::Solver.new(test).solve
 puts 'Part1', Day05::Solver.new(real).solve
 puts 'Part2 Test', Day05::Solver.new(test).solve2
 puts 'Part2', Day05::Solver.new(real).solve2
-
-

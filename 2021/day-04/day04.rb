@@ -7,9 +7,7 @@ def read_file(*args)
 end
 
 module Day04
-
   class Solver
-
     def initialize(content)
       @numbers, @data = parse_content(content)
       @visited = Array.new(@data.size) { |_| Matrix.zero(5, 5) }
@@ -42,8 +40,8 @@ module Day04
 
     def sum_board(bingo_number, board_number)
       sum = 0
-      (0...5).each do |i|
-        (0...5).each do |j|
+      5.times do |i|
+        5.times do |j|
           sum += @data[board_number][i, j] if @visited[board_number][i, j].zero?
         end
       end
@@ -56,8 +54,8 @@ module Day04
       @data.each_index do |inx|
         next if winning_board?(inx)
 
-        (0...5).each do |i|
-          (0...5).each do |j|
+        5.times do |i|
+          5.times do |j|
             next unless @data[inx][i, j] == bingo_number
 
             @visited[inx][i, j] = 1
@@ -70,7 +68,7 @@ module Day04
     end
 
     def winning_board?(inx)
-      (0...5).each do |z|
+      5.times do |z|
         if (0...5).map { |x| @visited[inx][z, x] }.sum == 5 || (0...5).map { |x| @visited[inx][x, z] }.sum == 5
           return true
         end
@@ -104,4 +102,3 @@ puts 'Part1 Test', Day04::Solver.new(test).solve
 puts 'Part1', Day04::Solver.new(real).solve
 puts 'Part2 Test', Day04::Solver.new(test).solve2
 puts 'Part2', Day04::Solver.new(real).solve2
-

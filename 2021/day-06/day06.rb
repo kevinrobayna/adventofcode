@@ -5,9 +5,7 @@ def read_file(*args)
 end
 
 module Day06
-
   class Solver
-
     def initialize(content)
       @fish_ages = {}
       parse_content(content).each do |inx|
@@ -60,5 +58,3 @@ puts 'Part1 Test', Day06::Solver.new(test).solve
 puts 'Part1', Day06::Solver.new(real).solve
 puts 'Part2 Test', Day06::Solver.new(test).solve2
 puts 'Part2', Day06::Solver.new(real).solve2
-
-

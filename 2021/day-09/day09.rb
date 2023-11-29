@@ -5,9 +5,7 @@ def read_file(*args)
 end
 
 module Day09
-
   class Solver
-
     def initialize(content)
       @content = parse_content(content)
     end
@@ -51,6 +49,3 @@ puts 'Part1 Test', Day09::Solver.new(test).solve
 puts 'Part1', Day09::Solver.new(real).solve
 puts 'Part2 Test', Day09::Solver.new(test).solve2
 puts 'Part2', Day09::Solver.new(real).solve2
-
-
-
