@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'json'
+
 def compare_solutions(expected, actual)
   raise "Expected #{expected} but got #{actual}" unless expected == actual
 
@@ -14,11 +16,7 @@ def read_file(filename)
 end
 
 def parse_file(filename)
-  read_file(filename).each_line.reject do |line|
-    line.strip.empty?
-  end.map do |line|
-    eval(line.strip)
-  end
+  read_file(filename).each_line.reject { _1.strip.empty? }.map { JSON.parse(_1.strip) }
 end
 
 def solve(filename)
