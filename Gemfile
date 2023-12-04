@@ -8,3 +8,5 @@ group :development do
   gem 'pry'
   gem 'rubocop'
 end
+
+gem 'colorize', '~> 1.1'
