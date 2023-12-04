@@ -43,6 +43,5 @@ puts 'Part1', solve('input.txt')
 
 compare_solutions(0, solve2('test.txt'))
 puts 'Part2', solve2('input.txt')
-
 EOF
 fi
