@@ -46,10 +46,15 @@ def solve(filename)
         positions = []
       end
     end
+    numbers << [number.join.to_i, positions] unless number.empty?
   end
+
+  puts "Parts To check: #{numbers.map { _1[0] }.join(', ')}"
   valid_parts = numbers.select do |_number, positions|
-    positions.any? do |inx_x, inx_y|
-      MOVEMENTS.any? do |mov_x, mov_y|
+    puts "Checking number: #{_number.to_s.yellow}"
+    x = positions.any? do |inx_x, inx_y|
+      y = MOVEMENTS.any? do |mov_x, mov_y|
+        puts "number: #{_number.to_s.yellow} (#{mov_x},#{mov_y})"
         next_x = mov_x + inx_x
         next_y = mov_y + inx_y
 
@@ -63,7 +68,14 @@ def solve(filename)
 
         true
       end
+
+      puts "number: #{_number.to_s.green} (#{inx_x},#{inx_y}) is valid" if y
+      puts "number: #{_number.to_s.red} (#{inx_x},#{inx_y}) is not valid" unless y
+      y
     end
+    puts "number: #{_number.to_s.green} is valid" if x
+    puts "number: #{_number.to_s.red} is not valid" unless x
+    x
   end
 
   board.each_with_index do |row, inx_x|
@@ -85,7 +97,7 @@ def solve2(filename)
   0
 end
 
-compare_solutions(4361, solve('test.txt'))
+# compare_solutions(4361, solve('test.txt'))
 compare_solutions(4361, solve('test2.txt'))
 compare_solutions(557_705, solve('input.txt'))
 puts 'Part1', solve('input.txt')
