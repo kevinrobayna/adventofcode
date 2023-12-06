@@ -1,13 +1,38 @@
 #!/bin/bash
 set -e
 
-year=$(date +"%Y")
-day=$(date +"%d")
+while getopts ":d:y:" opt; do
+	case $opt in
+	d)
+		day="$OPTARG"
+		;;
+	y)
+		year="$OPTARG"
+		;;
+	\?)
+		echo "Invalid option -$OPTARG" >&2
+		exit 1
+		;;
+	esac
 
-aoc-to-markdown -y $year -d $day -o $year -i
+	case $OPTARG in
+	-*)
+		echo "Option $opt needs a valid argument"
+		exit 1
+		;;
+	esac
+done
 
-FILE=./$year/day-$day/main.rb
+if [ -z ${year} ]; then
+	year=$(date +"%Y")
+fi
+if [ -z ${day} ]; then
+	day=$(date +"%d")
+fi
+
 echo "AoC: Setting up day $day in $year"
+aoc-to-markdown -y $year -d $day -o $year -i
+FILE=./$year/day-$day/main.rb
 if [ -f "$FILE" ]; then
 	echo "AoC: $FILE already exists. Skipping."
 else
