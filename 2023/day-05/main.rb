@@ -10,7 +10,7 @@ class Range
   def intersection(other)
     return nil if max < other.begin || other.max < self.begin
 
-    [self.begin, other.begin].max..[max, other.max].min
+    [self.begin, other.begin].max..[max, other.end].min
   end
 
   alias & intersection
@@ -40,8 +40,16 @@ def parse_file(filename)
       map_key = line.match(/(.*)\smap:/)[1]
       map_info[map_key.to_sym] = []
     elsif line.match(/\d+\s\d+\s\d+/)
-      map_info[map_key.to_sym] << line.scan(/\d+/).map(&:to_i)
-    else
+      dest, orig, range = line.scan(/\d+/).map(&:to_i)
+      map_info[map_key.to_sym] << [orig...(orig + range), dest - orig]
+    elsif map_key != ''
+      sorted = map_info[map_key.to_sym].sort_by { |r, _d| r.begin }
+      min_range = sorted.first.first.begin
+      max_range = sorted.last.first.end
+      sorted.unshift([0...min_range, 0]) unless min_range.zero?
+      sorted << [max_range...1_000_000_000_000, 0]
+
+      map_info[map_key.to_sym] = sorted
       map_key = ''
     end
   end
@@ -53,21 +61,33 @@ def solve(filename)
   seeds.map do |seed|
     seed_value = seed
     map_info.each_value do |values|
-      translation = values.select do |_dest, orig, range|
-        (orig...(orig + range)).include? seed_value
-      end
-      next if translation.empty?
-
-      dest, orig, _range = translation.first
-      seed_value = dest + (seed_value - orig)
+      delta = values.filter { |range, _| range.include?(seed_value) }.map(&:last).first || 0
+      seed_value += delta
     end
     seed_value
   end.min
 end
 
 def solve2(filename)
-  parse_file(filename)
-  0
+  seeds, info = parse_file(filename)
+  solution = Array.new(info.keys.length + 1) { Set.new }
+  seeds.each_slice(2) do |seed_start, len|
+    seed_range = (seed_start...(seed_start + len))
+    solution[0] << seed_range
+
+    info.values.each_with_index do |values, inx|
+      solution[inx].each do |range|
+        solution[inx + 1] += values.filter_map do |rng, delta|
+          if rng.overlaps?(range)
+            better_range = (rng & range)
+            ((better_range.begin + delta)...(better_range.end + delta))
+          end
+        end
+      end
+    end
+  end
+
+  solution.last.map(&:begin).min
 end
 
 compare_solutions(35, solve('test.txt'))
