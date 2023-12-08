@@ -26,7 +26,6 @@ def solve(filename)
   while node != :ZZZ
     next_side = directions[head % directions.length]
     next_node = nodes[node][next_side.to_sym].to_sym
-    puts "Node:#{node} H:#{next_side} N:#{next_node}"
 
     count += 1
     head += 1
@@ -44,5 +43,5 @@ compare_solutions(2, solve('test.txt'))
 compare_solutions(6, solve('test2.txt'))
 puts 'Part1', solve('input.txt')
 
-compare_solutions(0, solve2('test.txt'))
+compare_solutions(6, solve2('test3.txt'))
 puts 'Part2', solve2('input.txt')
