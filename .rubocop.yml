@@ -22,5 +22,5 @@ Metrics/BlockLength:
 Style/Documentation:
   Enabled: false
 
-Style:/MultilineBlockChain:
+Style/MultilineBlockChain:
   Enabled: false
