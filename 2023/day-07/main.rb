@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'pry'
+require 'colorize'
+
 def compare_solutions(expected, actual)
   raise "Expected #{expected} but got #{actual}" unless expected == actual
 
@@ -24,32 +26,50 @@ TYPES = {
   [1, 1, 1, 1, 1] => 'high_card'
 }.freeze
 
+RANK = '23456789TJQKA'
+
 def solve(filename)
-  read_file(filename).each_line.map do |line|
-    cards, bid = line.scan(/\w+/)
-    [cards, bid.to_i]
-  end.sort_by do |cards, _bid|
-    ranks = '23456789TJQKA'
-    config = cards.split('').tally
-    type = TYPES[config.values.sort.reverse]
-    type_index = TYPES.values.reverse.index(type)
-    rank = cards.split('').map { |card, _inx| ranks.rindex(card) }
-    order_by = [type_index, rank].flatten
-    # puts "#Cards=#{cards}, type=#{type}, order_by=#{order_by}"
-    order_by
-  end.each_with_index.sum do |((cards, bid), inx)|
-    puts "Cards #{cards} bid: #{bid} on rank: ##{inx + 1}"
-    (inx + 1) * bid
-  end
+  calculate_solution(filename, jocker: false)
 end
 
 def solve2(filename)
-  read_file(filename)
-  0
+  calculate_solution(filename, jocker: true)
+end
+
+def calculate_solution(filename, jocker: false)
+  ranks = if jocker
+            "J#{RANK.gsub('J', '')}"
+          else
+            RANK
+          end
+  read_file(filename).each_line.map do |line|
+    hand, bid = line.scan(/\w+/)
+    [hand, bid.to_i]
+  end.sort_by do |hand, _bid|
+    options = Set.new
+    options << hand
+    if hand.include?('J') && jocker
+      hand.split('').tally.each_key do |card|
+        next if card == 'J'
+
+        options << hand.gsub('J', card)
+      end
+    end
+    selected = options.max_by do |option|
+      type = TYPES[option.split('').tally.values.sort.reverse]
+      TYPES.values.reverse.index(type)
+    end
+    selected_type = TYPES[selected.split('').tally.values.sort.reverse]
+    type_index = TYPES.values.reverse.index(selected_type)
+
+    rank = hand.split('').map { |card, _inx| ranks.rindex(card) }
+    [type_index, rank].flatten
+  end
+                     .each_with_index.sum { |(_cards, bid), inx| (inx + 1) * bid }
 end
 
 compare_solutions(6440, solve('test.txt'))
 puts 'Part1', solve('input.txt')
 
-compare_solutions(0, solve2('test.txt'))
+compare_solutions(5905, solve2('test.txt'))
 puts 'Part2', solve2('input.txt')
