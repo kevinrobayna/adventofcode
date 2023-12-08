@@ -15,33 +15,59 @@ def read_file(filename)
 end
 
 def solve(filename)
-  directions, *lines = read_file(filename).scan(/\w+/)
+  directions, nodes = parse_file(filename)
   count = 0
-  nodes = lines.each_slice(3).reduce({}) do |acc, (source, left, right)|
-    acc.merge(source.to_sym => { L: left, R: right })
-  end
   node = 'AAA'.to_sym
   head = 0
 
   while node != :ZZZ
     next_side = directions[head % directions.length]
-    next_node = nodes[node][next_side.to_sym].to_sym
+    node = nodes[node][next_side.to_sym].to_sym
 
     count += 1
     head += 1
-    node = next_node
   end
   count
 end
 
 def solve2(filename)
-  read_file(filename)
-  0
+  directions, nodes = parse_file(filename)
+  count = 0
+  head = 0
+  node_head = nodes.select { _1[2] == 'A' }.keys.sort
+  desired_end = nodes.select { _1[2] == 'Z' }.keys.sort
+  cycles = []
+
+  until node_head.empty?
+    next_side = directions[head % directions.length]
+    node_head = node_head.map { |node| nodes[node][next_side.to_sym].to_sym }.sort
+
+    count += 1
+    head += 1
+
+    node_head = node_head.reject do |node|
+      cycles << count if desired_end.include?(node)
+
+      desired_end.include?(node)
+    end
+  end
+
+  cycles.reduce(1) { |acc, cycle| acc.lcm(cycle) }
+end
+
+def parse_file(filename)
+  directions, *lines = read_file(filename).scan(/\w+/)
+  nodes = lines.each_slice(3).reduce({}) do |acc, (source, left, right)|
+    acc.merge(source.to_sym => { L: left, R: right })
+  end
+  [directions, nodes]
 end
 
 compare_solutions(2, solve('test.txt'))
 compare_solutions(6, solve('test2.txt'))
 puts 'Part1', solve('input.txt')
 
+compare_solutions(2, solve2('test.txt'))
+compare_solutions(6, solve2('test2.txt'))
 compare_solutions(6, solve2('test3.txt'))
 puts 'Part2', solve2('input.txt')
