@@ -25,7 +25,7 @@ module Day08
     end
 
     def solve
-      @content.map { |line| line[:output].map { |output| is_unique_char_digit?(output) ? 1 : 0 }.sum }.sum
+      @content.map { |line| line[:output].map { |output| unique_char_digit?(output) ? 1 : 0 }.sum }.sum
     end
 
     def solve2
@@ -34,7 +34,7 @@ module Day08
 
     private
 
-    def is_unique_char_digit?(output)
+    def unique_char_digit?(output)
       [@digits[1].count, @digits[4].count, @digits[7].count, @digits[8].count].include? output.length
     end
 
