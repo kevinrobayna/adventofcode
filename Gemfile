@@ -2,7 +2,7 @@
 
 source 'https://rubygems.org'
 
+gem 'colorize', '~> 1.1'
 gem 'matrix'
 gem 'pry'
 gem 'rubocop'
-gem 'colorize', '~> 1.1'
