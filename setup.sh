@@ -31,7 +31,7 @@ if [ -z ${day} ]; then
 fi
 
 echo "AoC: Setting up day $day in $year"
-aoc-to-markdown -y $year -d $day -o $year -i
+aoc2md -y $year -d $day 
 FILE=./$year/day-$day/main.rb
 if [ -f "$FILE" ]; then
 	echo "AoC: $FILE already exists. Skipping."

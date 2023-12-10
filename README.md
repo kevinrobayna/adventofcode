@@ -10,11 +10,11 @@ to have a huge amount of setup so that the IDE can help me with the code.
 
 ## Structure
 
-I'm currently using the [aoc-to-markdown](https://github.com/antonio-ramadas/aoc-to-markdown) library so that i can
+I'm currently using the [aoc2md](https://github.com/kevinrobayna/aoc2md) cli so that I can
 download the problem description and the input.
 
-For example for the year 2021 and the day 5 I'd execute `aoc-to-markdown -y 2021 -d 5 -o 2021 -i` so that the util would
+For example for the year 2021 and the day 5 I'd execute `aoc2md -y 2021 -d 5` so that the cli would
 download the problem in the folder 2021
 
-Although I use a script to setup every day so that i avoid myself copying and pasting the same template over and over
+Although I use a script to setup every day so that I avoid myself copying and pasting the same template over and over
 again.
