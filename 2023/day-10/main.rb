@@ -23,7 +23,10 @@ def solve2(filename)
   0
 end
 
-compare_solutions(0, solve('test.txt'))
+compare_solutions(4, solve('test.txt'))
+compare_solutions(4, solve('test2.txt'))
+compare_solutions(8, solve('test3.txt'))
+compare_solutions(8, solve('test4.txt'))
 puts 'Part1', solve('input.txt')
 
 compare_solutions(0, solve2('test.txt'))
