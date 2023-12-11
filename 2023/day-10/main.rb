@@ -16,6 +16,11 @@ def read_file(filename)
   File.read(File.join(__dir__, filename))
 end
 
+UP = [-1, 0].freeze
+DOWN = [1, 0].freeze
+RIGHT = [0, 1].freeze
+LEFT = [0, -1].freeze
+
 def solve(filename)
   start = []
   grid = read_file(filename).each_line.with_index.map do |line, row|
@@ -41,7 +46,8 @@ def solve2(filename)
 end
 
 def find_cycle(grid, start)
-  start_neighburs = possible_ends(grid, start)
+  start_neighburs = valid_movements(start, grid, next_positions(grid[start.first][start.last]))
+
   queue = [[start]]
   until queue.empty?
     path = queue.pop
@@ -56,35 +62,22 @@ def find_cycle(grid, start)
   end
 end
 
-def possible_ends(grid, start)
-  up = [-1, 0]
-  down = [1, 0]
-  right = [0, 1]
-  left = [0, -1]
-
-  valid_movements(start, grid, [up, down, left, right])
-end
-
 def next_positions(value)
-  up = [-1, 0]
-  down = [1, 0]
-  right = [0, 1]
-  left = [0, -1]
   case value
   when 'S'
-    [up, down, left, right]
+    [UP, DOWN, LEFT, RIGHT]
   when '|'
-    [up, down]
+    [UP, DOWN]
   when '-'
-    [right, left]
+    [RIGHT, LEFT]
   when 'L'
-    [up, right]
+    [UP, RIGHT]
   when 'J'
-    [up, left]
+    [UP, LEFT]
   when '7'
-    [down, left]
+    [DOWN, LEFT]
   when 'F'
-    [down, right]
+    [DOWN, RIGHT]
   else
     []
   end
