@@ -43,7 +43,38 @@ def solve2(filename)
 
   cycle = find_cycle(grid, start)
 
-  debug_board(grid, cycle)
+  clean_grid = Array.new(grid.length) { Array.new(grid.first.size, '.') }
+  cycle.each do |x, y|
+    # TODO: Need to change the value of S for the actual value underneath as in my example it does not matter but it might do
+    clean_grid[x][y] = grid[x][y]
+  end
+
+  inside_cells = []
+  inside = 0
+  clean_grid.each_with_index do |row, x|
+    row.each_with_index do |_cell, y|
+      next if cycle.include?([x, y])
+
+      north = 0
+      south = 0
+
+      # https://en.wikipedia.org/wiki/Point_in_polygon
+      (y..row.size).each do |y2|
+        # Count north facing blockers
+        north += 1 if ['J', 'L', '|'].include?(clean_grid[x][y2])
+
+        # Count south facing blockers
+        south += 1 if ['F', '7', '|'].include?(clean_grid[x][y2])
+      end
+      if [north, south].min.odd?
+        inside += 1
+        inside_cells << [x, y]
+      end
+    end
+  end
+
+  puts debug_board(clean_grid, cycle, inside_cells)
+  inside
 end
 
 def parse_file(filename)
@@ -82,11 +113,13 @@ def neighbors(current, grid)
   DIR[grid[x][y]].map { |inc_x, inc_y| [x + inc_x, y + inc_y] }
 end
 
-def debug_board(board, path)
+def debug_board(board, path, inside = [])
   board.each_with_index.map do |row, inx_x|
     row.each_with_index.map do |v, inx_y|
       if path.include?([inx_x, inx_y])
         v.green
+      elsif inside.include?([inx_x, inx_y])
+        'x'.yellow
       else
         v.red
       end
