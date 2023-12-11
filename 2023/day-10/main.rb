@@ -23,33 +23,37 @@ def solve(filename)
     start = [row, chars.index('S')] if chars.include?('S')
     chars
   end
-  start_neighburs = possible_ends(grid, start)
-  p start_neighburs
-  return 0 if start_neighburs.length.zero?
 
-  completed = []
+  find_cycle(grid, start).length / 2
+end
+
+def solve2(filename)
+  start = []
+  grid = read_file(filename).each_line.with_index.map do |line, row|
+    chars = line.strip.chars
+    start = [row, chars.index('S')] if chars.include?('S')
+    chars
+  end
+
+  cycle = find_cycle(grid, start)
+
+  debug_board(grid, cycle)
+end
+
+def find_cycle(grid, start)
+  start_neighburs = possible_ends(grid, start)
   queue = [[start]]
   until queue.empty?
     path = queue.pop
     inx_x, inx_y = path.last
 
     next_paths = valid_movements([inx_x, inx_y], grid, next_positions(grid[inx_x][inx_y]))
-                  .reject { |next_x, next_y| path.include?([next_x, next_y]) }
+                 .reject { |next_x, next_y| path.include?([next_x, next_y]) }
 
-    completed << path if next_paths.empty? && (start_neighburs & path) == start_neighburs
+    return path if next_paths.empty? && (start_neighburs & path) == start_neighburs
 
     next_paths.each { |next_pos| queue << (path.dup << next_pos) }
-
   end
-  completed.each do |path|
-    puts debug_board(grid, path)
-  end
-  completed.first.length / completed.length
-end
-
-def solve2(filename)
-  read_file(filename)
-  0
 end
 
 def possible_ends(grid, start)
@@ -120,5 +124,7 @@ compare_solutions(4, solve('test2.txt'))
 compare_solutions(8, solve('test4.txt'))
 puts 'Part1', solve('input.txt')
 
-compare_solutions(0, solve2('test.txt'))
+compare_solutions(4, solve2('test5.txt'))
+compare_solutions(8, solve2('test6.txt'))
+compare_solutions(10, solve2('test7.txt'))
 puts 'Part2', solve2('input.txt')
