@@ -21,79 +21,65 @@ DOWN = [1, 0].freeze
 RIGHT = [0, 1].freeze
 LEFT = [0, -1].freeze
 
+DIR = {
+  '|' => [UP, DOWN],
+  '-' => [RIGHT, LEFT],
+  'L' => [UP, RIGHT],
+  'J' => [UP, LEFT],
+  'F' => [DOWN, RIGHT],
+  '7' => [DOWN, LEFT],
+  '.' => [],
+  'S' => []
+}.freeze
+
 def solve(filename)
-  start = []
-  grid = read_file(filename).each_line.with_index.map do |line, row|
-    chars = line.strip.chars
-    start = [row, chars.index('S')] if chars.include?('S')
-    chars
-  end
+  start, grid = parse_file(filename)
 
   find_cycle(grid, start).length / 2
 end
 
 def solve2(filename)
-  start = []
-  grid = read_file(filename).each_line.with_index.map do |line, row|
-    chars = line.strip.chars
-    start = [row, chars.index('S')] if chars.include?('S')
-    chars
-  end
+  start, grid = parse_file(filename)
 
   cycle = find_cycle(grid, start)
 
   debug_board(grid, cycle)
 end
 
+def parse_file(filename)
+  start = []
+  grid = read_file(filename).each_line.with_index.map do |line, row|
+    chars = line.strip.chars
+    start = [row, chars.index('S')] if chars.include?('S')
+    chars
+  end
+
+  [start, grid]
+end
+
 def find_cycle(grid, start)
-  start_neighburs = valid_movements(start, grid, next_positions(grid[start.first][start.last]))
-
-  queue = [[start]]
-  until queue.empty?
-    path = queue.pop
-    inx_x, inx_y = path.last
-
-    next_paths = valid_movements([inx_x, inx_y], grid, next_positions(grid[inx_x][inx_y]))
-                 .reject { |next_x, next_y| path.include?([next_x, next_y]) }
-
-    return path if next_paths.empty? && (start_neighburs & path) == start_neighburs
-
-    next_paths.each { |next_pos| queue << (path.dup << next_pos) }
+  start_neighbors = [UP, DOWN, LEFT, RIGHT].map do |dx, dy|
+    [start.first + dx, start.last + dy]
+  end.select do |pos|
+    neighbors(pos, grid).include?(start)
   end
+
+  start_point = start_neighbors.first
+  pipe = [start, start_point].to_set
+  while start_point != start_neighbors.last
+    neighbors(start_point, grid).each do |neighbor|
+      unless pipe.include?(neighbor)
+        pipe << neighbor
+        start_point = neighbor
+      end
+    end
+  end
+  pipe
 end
 
-def next_positions(value)
-  case value
-  when 'S'
-    [UP, DOWN, LEFT, RIGHT]
-  when '|'
-    [UP, DOWN]
-  when '-'
-    [RIGHT, LEFT]
-  when 'L'
-    [UP, RIGHT]
-  when 'J'
-    [UP, LEFT]
-  when '7'
-    [DOWN, LEFT]
-  when 'F'
-    [DOWN, RIGHT]
-  else
-    []
-  end
-end
-
-def valid_movements(current, grid, movements)
-  movements.map { |inc_x, inc_y| [current.first + inc_x, current.last + inc_y] }
-           .select { |next_x, _next_y| next_x >= 0 && next_x <= grid.length }
-           .select { |next_x, next_y| next_y >= 0 && next_y <= grid[next_x].length }
-           .select do |x, y|
-    next_positions(grid[x][y])
-      .map { |inc_x, inc_y| [x + inc_x, y + inc_y] }
-      .select { |next_x, _next_y| next_x >= 0 && next_x <= grid.length }
-      .select { |next_x, next_y| next_y >= 0 && next_y <= grid[next_x].length }
-      .include?(current)
-  end
+def neighbors(current, grid)
+  x, y = current
+  DIR[grid[x][y]].map { |inc_x, inc_y| [x + inc_x, y + inc_y] }
 end
 
 def debug_board(board, path)
