@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'pry'
+require 'colorize'
+
 def compare_solutions(expected, actual)
   raise "Expected #{expected} but got #{actual}" unless expected == actual
 
@@ -14,13 +17,54 @@ def read_file(filename)
 end
 
 def solve(filename)
-  read_file(filename)
-  0
+  start = []
+  grid = read_file(filename).each_line.with_index.map do |line, row|
+    chars = line.strip.chars
+    start = [[row, chars.index('S')]] if chars.include?('S')
+    chars
+  end
+  queue = [start]
+  until queue.empty?
+    inx_x, inx_y = queue.pop
+    p inx_x, inx_y
+  end
+
 end
 
 def solve2(filename)
   read_file(filename)
   0
+end
+
+def next_positions(value)
+  case value
+  when '|'
+    [[1, 0], [-1, 0]]
+  when '-'
+    [[0, 1], [0, 1]]
+  when 'L'
+    [[0, 1], [0, 1]]
+  when 'J'
+    [[0, 1], [0, 1]]
+  when '7'
+    [[0, 1], [0, 1]]
+  when 'F'
+    [[0, 1], [0, 1]]
+  else
+    []
+  end
+end
+
+def debug_board(board)
+  board.map do |row|
+    row.map do |v|
+      if v.nil?
+        'x'.red
+      else
+        v.to_s.green
+      end
+    end
+  end.map(&:join).join("\n")
 end
 
 compare_solutions(4, solve('test.txt'))
