@@ -45,7 +45,6 @@ def solve2(filename)
 
   clean_grid = Array.new(grid.length) { Array.new(grid.first.size, '.') }
   cycle.each do |x, y|
-    # TODO: Need to change the value of S for the actual value underneath as in my example it does not matter but it might do
     clean_grid[x][y] = grid[x][y]
   end
 
