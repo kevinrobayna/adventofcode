@@ -15,7 +15,6 @@ end
 
 def solve(filename)
   read_file(filename)
-
   0
 end
 
@@ -24,7 +23,7 @@ def solve2(filename)
   0
 end
 
-compare_solutions(405, solve('test.txt'))
+compare_solutions(0, solve('test.txt'))
 puts 'Part1', solve('input.txt')
 
 compare_solutions(0, solve2('test.txt'))
