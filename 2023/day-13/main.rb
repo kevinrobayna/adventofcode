@@ -43,7 +43,6 @@ def solve2(filename)
 
     columns -= (n_columns)
     rows -= (n_rows)
-    puts "R: #{rows}, C: #{columns}, original R:#{n_rows}, C:#{n_columns}"
     rows.first.to_i * 100 + columns.first.to_i
   end
 end
