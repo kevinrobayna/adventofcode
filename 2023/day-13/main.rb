@@ -16,8 +16,7 @@ def read_file(filename)
 end
 
 def solve(filename)
-  parse_input(filename)
-    .each_with_index.sum do |pattern, _pattern_no|
+  parse_input(filename).sum do |pattern|
     n_columns = find_matching(pattern)
     n_rows = find_matching(pattern.transpose)
     n_rows.first.to_i * 100 + n_columns.first.to_i
@@ -25,8 +24,7 @@ def solve(filename)
 end
 
 def solve2(filename)
-  parse_input(filename)
-    .each_with_index.sum do |pattern, _pattern_no|
+  parse_input(filename).sum do |pattern|
     n_columns = find_matching(pattern)
     n_rows = find_matching(pattern.transpose)
 
