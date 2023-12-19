@@ -139,7 +139,7 @@ def solve2(filename)
     monkeys.each do |monkey|
       while monkey.items?
         item, throw_to = monkey.inspect_item
-        item = item % divider
+        item %= divider
         monkeys[throw_to].take(item)
       end
     end
