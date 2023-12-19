@@ -139,7 +139,7 @@ def debug_board(board, valid_parts)
       board[inx_x][inx_y] = v.red if v == '*'
     end
   end
-  valid_parts.each do |_number, positions|
+  valid_parts.each_value do |positions|
     positions.each do |inx_x, inx_y|
       board[inx_x][inx_y] = board[inx_x][inx_y].yellow
     end
