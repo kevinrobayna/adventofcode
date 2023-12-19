@@ -41,8 +41,8 @@ def solve2(filename)
       end
     end
 
-    columns -= (n_columns)
-    rows -= (n_rows)
+    columns -= n_columns
+    rows -= n_rows
     rows.first.to_i * 100 + columns.first.to_i
   end
 end
