@@ -33,11 +33,11 @@ module Day09
       right = @content[i][j + 1] unless (j + 1) > (@content.first.length - 1)
 
       min = [value, up, down, left, right].min
-      min == value && [value, up, down, left, right].select { |it| it == min }.count == 1
+      min == value && [value, up, down, left, right].count { |it| it == min } == 1
     end
 
     def parse_content(content)
-      content.split("\n").map { |line| line.split("").map(&:to_i) }
+      content.split("\n").map { |line| line.chars.map(&:to_i) }
     end
   end
 end

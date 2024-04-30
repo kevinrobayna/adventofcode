@@ -49,20 +49,20 @@ def calculate_solution(filename, jocker: false)
     options = Set.new
     options << hand
     if hand.include?("J") && jocker
-      hand.split("").tally.each_key do |card|
+      hand.chars.tally.each_key do |card|
         next if card == "J"
 
         options << hand.gsub("J", card)
       end
     end
     selected = options.max_by do |option|
-      type = TYPES[option.split("").tally.values.sort.reverse]
+      type = TYPES[option.chars.tally.values.sort.reverse]
       TYPES.values.reverse.index(type)
     end
-    selected_type = TYPES[selected.split("").tally.values.sort.reverse]
+    selected_type = TYPES[selected.chars.tally.values.sort.reverse]
     type_index = TYPES.values.reverse.index(selected_type)
 
-    rank = hand.split("").map { |card, _inx| ranks.rindex(card) }
+    rank = hand.chars.map { |card, _inx| ranks.rindex(card) }
     [type_index, rank].flatten
   end
     .each_with_index.sum { |(_cards, bid), inx| (inx + 1) * bid }

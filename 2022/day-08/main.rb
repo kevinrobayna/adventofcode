@@ -19,11 +19,7 @@ def solve(filename)
   m = parse_input(filename)
   visited = Matrix.zero(m.row_count, m.column_count)
   visited.each_with_index do |_, inx_i, inx_j|
-    visited[inx_i, inx_j] = if edge?(inx_i, inx_j, m.row_count, m.column_count)
-      true
-    else
-      false
-    end
+    visited[inx_i, inx_j] = edge?(inx_i, inx_j, m.row_count, m.column_count)
   end
 
   (1...m.row_count).each do |row|

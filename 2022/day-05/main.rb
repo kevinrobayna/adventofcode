@@ -53,7 +53,7 @@ def parse_input(filename)
       instructions << [amount, from - 1, to - 1]
     elsif line.include?("[")
       inx = 0
-      elements = line.split("")
+      elements = line.chars
       until elements.empty?
         head = elements.shift(3).join.strip
         unless head.empty?
@@ -65,7 +65,7 @@ def parse_input(filename)
       end
     elsif line.include?("1")
       # We should have the same number of stacks as the number of columns
-      raise if stacks.size != line.split(" ").select(&:to_i).size
+      raise if stacks.size != line.split(" ").count(&:to_i)
     end
   end
   [stacks, instructions]

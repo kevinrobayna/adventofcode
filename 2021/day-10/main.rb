@@ -11,7 +11,7 @@ def read_file(*)
 end
 
 def solve(filename)
-  content = read_file(filename).split("\n").map { |line| line.split("") }
+  content = read_file(filename).split("\n").map { |line| line.chars }
   content.each_index.map do |expression|
     find_invalid_char(content, expression, [content[expression].first], 0)
   end.sum
