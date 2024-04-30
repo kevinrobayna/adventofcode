@@ -11,8 +11,8 @@ module Day09
     end
 
     def solve
-      risks = @content.each_with_index.map do |_, row|
-        _.each_with_index.map { |value, column| low_point?(row, column) ? value + 1 : 0 }.sum
+      risks = @content.each_with_index.map do |x, row|
+        x.each_with_index.map { |value, column| low_point?(row, column) ? value + 1 : 0 }.sum
       end
       risks.sum
     end
