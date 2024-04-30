@@ -1,17 +1,12 @@
 # frozen_string_literal: true
 
 require "pry"
+require "minitest/autorun"
 
 class Object
   def number?
     to_f.to_s == to_s || to_i.to_s == to_s
   end
-end
-
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
-
-  puts "Congratulations! Got expected result (#{expected})"
 end
 
 def read_file(filename)
@@ -64,9 +59,19 @@ def solve2(filename)
   end.sum
 end
 
-compare_solutions(142, solve("test.txt"))
-puts "Part1", solve("input.txt")
+class AoCTest < Minitest::Test
+  def test_solve
+    assert solve("test.txt") == 142
+  end
 
-compare_solutions(142, solve2("test.txt"))
-compare_solutions(281, solve2("test2.txt"))
+  def test_solve2
+    assert solve2("test.txt") == 142
+  end
+
+  def test_solve2_with_different_input
+    assert solve2("test2.txt") == 281
+  end
+end
+
+puts "Part1", solve("input.txt")
 puts "Part2", solve2("input.txt")

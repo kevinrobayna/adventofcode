@@ -1,11 +1,7 @@
 # frozen_string_literal: true
 
 require "pry"
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
-
-  puts "Congratulations! Got expected result (#{expected})"
-end
+require "minitest/autorun"
 
 def read_file(filename)
   # Get the directory of the currently executing script
@@ -56,8 +52,15 @@ def solve2(filename)
   end
 end
 
-compare_solutions(8, solve("test.txt"))
-puts "Part1", solve("input.txt")
+class AoCTest < Minitest::Test
+  def test_solve
+    assert solve("test.txt") == 8
+  end
 
-compare_solutions(2286, solve2("test.txt"))
+  def test_solve2
+    assert solve2("test.txt") == 2286
+  end
+end
+
+puts "Part1", solve("input.txt")
 puts "Part2", solve2("input.txt")
