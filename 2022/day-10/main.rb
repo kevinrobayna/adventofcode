@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'matrix'
+require "matrix"
 
 def compare_solutions(expected, actual)
   raise "Expected #{expected} but got #{actual}" unless expected == actual
@@ -16,8 +16,8 @@ def read_file(filename)
 end
 
 CYCLES = {
-  'noop' => 1,
-  'addx' => 2
+  "noop" => 1,
+  "addx" => 2
 }.freeze
 
 class Instruction
@@ -44,7 +44,7 @@ class Instruction
   end
 
   def noop?
-    @name == 'noop'
+    @name == "noop"
   end
 
   def to_s
@@ -57,7 +57,7 @@ class Instruction
 end
 
 def solve(filename)
-  clock_values = { 1 => 1 }
+  clock_values = {1 => 1}
   instructions = instructions(filename)
 
   clock = 1
@@ -79,10 +79,10 @@ end
 
 class Sprite
   def initialize
-    sprite = Array.new(40, '.')
-    sprite[0] = '#'
-    sprite[1] = '#'
-    sprite[2] = '#'
+    sprite = Array.new(40, ".")
+    sprite[0] = "#"
+    sprite[1] = "#"
+    sprite[2] = "#"
     @sprite = sprite
   end
 
@@ -95,7 +95,7 @@ class Sprite
   end
 
   def registry
-    @sprite.find_index('#')
+    @sprite.find_index("#")
   end
 
   def shift(chars)
@@ -112,7 +112,7 @@ class Sprite
     end
     raise unless @sprite.size == 40
 
-    count = @sprite.select { _1 == '#' }.size
+    count = @sprite.select { _1 == "#" }.size
     raise "Expected 3# but got #{count} after moving N #{chars}" unless count == 3
 
     chars
@@ -121,7 +121,7 @@ end
 
 def solve2(filename)
   instructions = instructions(filename)
-  screen = Matrix.build(6, 40) { '.' }
+  screen = Matrix.build(6, 40) { "." }
   sprite = Sprite.new
 
   puts "Sprite position: #{sprite}"
@@ -157,7 +157,7 @@ end
 
 def instructions(filename)
   read_file(filename).each_line.map do |line|
-    name, value = line.split(' ')
+    name, value = line.split(" ")
     if value
       Instruction.new(name, value.to_i)
     else
@@ -166,8 +166,8 @@ def instructions(filename)
   end
 end
 
-compare_solutions(13_140, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+compare_solutions(13_140, solve("test.txt"))
+puts "Part1", solve("input.txt")
 
 expected = "##..##..##..##..##..##..##..##..##..##..
 ###...###...###...###...###...###...###.
@@ -175,5 +175,5 @@ expected = "##..##..##..##..##..##..##..##..##..##..
 #####.....#####.....#####.....#####.....
 ######......######......######......####
 #######.......#######.......#######....."
-compare_solutions(expected, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+compare_solutions(expected, solve2("test.txt"))
+puts "Part2", solve2("input.txt")

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'pry'
+require "pry"
 
 class Object
   def number?
@@ -42,10 +42,10 @@ NUMBERS_MAP = {
 
 def solve2(filename)
   read_file(filename).each_line.map do |line|
-    line = line.gsub("\n", '')
+    line = line.delete("\n")
     parsed_line = []
     head = 0
-    (1..line.chars.length).each do |tail|
+    (1..line.length).each do |tail|
       str_to_check = line[head...tail]
       NUMBERS_MAP.each do |key, value|
         if str_to_check.include?(key.to_s)
@@ -64,9 +64,9 @@ def solve2(filename)
   end.sum
 end
 
-compare_solutions(142, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+compare_solutions(142, solve("test.txt"))
+puts "Part1", solve("input.txt")
 
-compare_solutions(142, solve2('test.txt'))
-compare_solutions(281, solve2('test2.txt'))
-puts 'Part2', solve2('input.txt')
+compare_solutions(142, solve2("test.txt"))
+compare_solutions(281, solve2("test2.txt"))
+puts "Part2", solve2("input.txt")

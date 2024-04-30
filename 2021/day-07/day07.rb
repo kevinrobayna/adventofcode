@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-def read_file(*args)
-  File.read(File.join(File.absolute_path(''), *args))
+def read_file(*)
+  File.read(File.join(File.absolute_path(""), *))
 end
 
 module Day07
@@ -40,15 +40,15 @@ module Day07
     end
 
     def parse_content(content)
-      content.split("\n").first.split(',').map(&:to_i)
+      content.split("\n").first.split(",").map(&:to_i)
     end
   end
 end
 
-test = read_file('test.txt')
-real = read_file('input.txt')
+test = read_file("test.txt")
+real = read_file("input.txt")
 
-puts 'Part1 Test', Day07::Solver.new(test).solve
-puts 'Part1', Day07::Solver.new(real).solve
-puts 'Part2 Test', Day07::Solver.new(test).solve2
-puts 'Part2', Day07::Solver.new(real).solve2
+puts "Part1 Test", Day07::Solver.new(test).solve
+puts "Part1", Day07::Solver.new(real).solve
+puts "Part2 Test", Day07::Solver.new(test).solve2
+puts "Part2", Day07::Solver.new(real).solve2

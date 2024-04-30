@@ -17,7 +17,7 @@ end
 class String
   def numeric?
     !Float(self).nil?
-  rescue StandardError
+  rescue
     false
   end
 end
@@ -37,7 +37,7 @@ def solve2(filename)
   stacks, instructions = parse_input(filename)
   instructions.each do |quantity, from, to|
     crates = stacks[from].shift(quantity)
-    crates.reverse.each do |crate|
+    crates.reverse_each do |crate|
       stacks[to].unshift(crate)
     end
   end
@@ -48,24 +48,24 @@ def parse_input(filename)
   stacks = {}
   instructions = []
   read_file(filename).each_line do |line|
-    if line.include?('move')
-      amount, from, to = line.split(' ').select(&:numeric?).map(&:to_i)
+    if line.include?("move")
+      amount, from, to = line.split(" ").select(&:numeric?).map(&:to_i)
       instructions << [amount, from - 1, to - 1]
-    elsif line.include?('[')
+    elsif line.include?("[")
       inx = 0
-      elements = line.split('')
+      elements = line.split("")
       until elements.empty?
         head = elements.shift(3).join.strip
         unless head.empty?
           stacks[inx] ||= []
-          stacks[inx] << head.gsub('[', '').gsub(']', '')
+          stacks[inx] << head.delete("[").delete("]")
         end
         inx += 1
         elements.shift(1) # skip space between words
       end
-    elsif line.include?('1')
+    elsif line.include?("1")
       # We should have the same number of stacks as the number of columns
-      raise if stacks.size != line.split(' ').select(&:to_i).size
+      raise if stacks.size != line.split(" ").select(&:to_i).size
     end
   end
   [stacks, instructions]
@@ -75,8 +75,8 @@ def build_solution(columns)
   columns.sort.to_h.map { |_, value| value.first }.join
 end
 
-compare_solutions('CMZ', solve('test.txt'))
-puts 'Part1', solve('input.txt')
+compare_solutions("CMZ", solve("test.txt"))
+puts "Part1", solve("input.txt")
 
-compare_solutions('MCD', solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+compare_solutions("MCD", solve2("test.txt"))
+puts "Part2", solve2("input.txt")

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'pry'
+require "pry"
 def compare_solutions(expected, actual)
   raise "Expected #{expected} but got #{actual}" unless expected == actual
 
@@ -39,8 +39,8 @@ def calculate_ways(times, distances)
   end
 end
 
-compare_solutions(288, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+compare_solutions(288, solve("test.txt"))
+puts "Part1", solve("input.txt")
 
-compare_solutions(71_503, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+compare_solutions(71_503, solve2("test.txt"))
+puts "Part2", solve2("input.txt")

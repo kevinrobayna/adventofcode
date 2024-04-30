@@ -35,8 +35,8 @@ def get_sorted_snacks(filename)
   sums.sort
 end
 
-compare_solutions(24_000, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+compare_solutions(24_000, solve("test.txt"))
+puts "Part1", solve("input.txt")
 
-compare_solutions(45_000, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+compare_solutions(45_000, solve2("test.txt"))
+puts "Part2", solve2("input.txt")

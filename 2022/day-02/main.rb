@@ -22,14 +22,14 @@ LOSE = 0
 DRAW = 3
 
 TRANSLATION = {
-  'A' => 0,
-  'X' => 0,
+  "A" => 0,
+  "X" => 0,
 
-  'B' => 1,
-  'Y' => 1,
+  "B" => 1,
+  "Y" => 1,
 
-  'C' => 2,
-  'Z' => 2
+  "C" => 2,
+  "Z" => 2
 }.freeze
 
 POINTS = [
@@ -40,7 +40,7 @@ POINTS = [
 
 def solve(filename)
   hands = read_file(filename).split("\n").map do |line|
-    opponent, yours = line.split(' ')
+    opponent, yours = line.split(" ")
 
     opponent = TRANSLATION[opponent]
     yours = TRANSLATION[yours]
@@ -60,7 +60,7 @@ def solve2(filename)
   ]
 
   hands = read_file(filename).split("\n").map do |line|
-    opponent, yours = line.split(' ')
+    opponent, yours = line.split(" ")
 
     opponent = TRANSLATION[opponent]
     yours = TRANSLATION[yours]
@@ -73,8 +73,8 @@ def solve2(filename)
   hands.sum
 end
 
-compare_solutions(15, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+compare_solutions(15, solve("test.txt"))
+puts "Part1", solve("input.txt")
 
-compare_solutions(12, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+compare_solutions(12, solve2("test.txt"))
+puts "Part2", solve2("input.txt")

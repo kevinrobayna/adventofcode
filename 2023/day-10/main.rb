@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'pry'
-require 'colorize'
+require "pry"
+require "colorize"
 
 def compare_solutions(expected, actual)
   raise "Expected #{expected} but got #{actual}" unless expected == actual
@@ -22,14 +22,14 @@ RIGHT = [0, 1].freeze
 LEFT = [0, -1].freeze
 
 DIR = {
-  '|' => [UP, DOWN],
-  '-' => [RIGHT, LEFT],
-  'L' => [UP, RIGHT],
-  'J' => [UP, LEFT],
-  'F' => [DOWN, RIGHT],
-  '7' => [DOWN, LEFT],
-  '.' => [],
-  'S' => []
+  "|" => [UP, DOWN],
+  "-" => [RIGHT, LEFT],
+  "L" => [UP, RIGHT],
+  "J" => [UP, LEFT],
+  "F" => [DOWN, RIGHT],
+  "7" => [DOWN, LEFT],
+  "." => [],
+  "S" => []
 }.freeze
 
 def solve(filename)
@@ -43,7 +43,7 @@ def solve2(filename)
 
   cycle = find_cycle(grid, start)
 
-  clean_grid = Array.new(grid.length) { Array.new(grid.first.size, '.') }
+  clean_grid = Array.new(grid.length) { Array.new(grid.first.size, ".") }
   cycle.each do |x, y|
     clean_grid[x][y] = grid[x][y]
   end
@@ -60,10 +60,10 @@ def solve2(filename)
       # https://en.wikipedia.org/wiki/Point_in_polygon
       (y..row.size).each do |y2|
         # Count north facing blockers
-        north += 1 if ['J', 'L', '|'].include?(clean_grid[x][y2])
+        north += 1 if ["J", "L", "|"].include?(clean_grid[x][y2])
 
         # Count south facing blockers
-        south += 1 if ['F', '7', '|'].include?(clean_grid[x][y2])
+        south += 1 if ["F", "7", "|"].include?(clean_grid[x][y2])
       end
       if [north, south].min.odd?
         inside += 1
@@ -80,7 +80,7 @@ def parse_file(filename)
   start = []
   grid = read_file(filename).each_line.with_index.map do |line, row|
     chars = line.strip.chars
-    start = [row, chars.index('S')] if chars.include?('S')
+    start = [row, chars.index("S")] if chars.include?("S")
     chars
   end
 
@@ -118,7 +118,7 @@ def debug_board(board, path, inside = [])
       if path.include?([inx_x, inx_y])
         v.green
       elsif inside.include?([inx_x, inx_y])
-        'x'.yellow
+        "x".yellow
       else
         v.red
       end
@@ -127,15 +127,15 @@ def debug_board(board, path, inside = [])
 end
 
 # Easy ones
-compare_solutions(4, solve('test.txt'))
-compare_solutions(8, solve('test3.txt'))
+compare_solutions(4, solve("test.txt"))
+compare_solutions(8, solve("test3.txt"))
 
 # Annoying ones
-compare_solutions(4, solve('test2.txt'))
-compare_solutions(8, solve('test4.txt'))
-puts 'Part1', solve('input.txt')
+compare_solutions(4, solve("test2.txt"))
+compare_solutions(8, solve("test4.txt"))
+puts "Part1", solve("input.txt")
 
-compare_solutions(4, solve2('test5.txt'))
-compare_solutions(8, solve2('test6.txt'))
-compare_solutions(10, solve2('test7.txt'))
-puts 'Part2', solve2('input.txt')
+compare_solutions(4, solve2("test5.txt"))
+compare_solutions(8, solve2("test6.txt"))
+compare_solutions(10, solve2("test7.txt"))
+puts "Part2", solve2("input.txt")

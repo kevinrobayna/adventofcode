@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require 'matrix'
-require 'ostruct'
+require "matrix"
+require "ostruct"
 
-def read_file(*args)
-  File.read(File.join(File.absolute_path(''), *args))
+def read_file(*)
+  File.read(File.join(File.absolute_path(""), *))
 end
 
 module Day05
@@ -46,8 +46,8 @@ module Day05
           pos_y = from.y
           @matrix[pos_y, pos_x] += 1
           while pos_x != to.x && pos_y != to.y
-            pos_x = pos_x < to.x ? pos_x + 1 : pos_x - 1
-            pos_y = pos_y < to.y ? pos_y + 1 : pos_y - 1
+            pos_x = (pos_x < to.x) ? pos_x + 1 : pos_x - 1
+            pos_y = (pos_y < to.y) ? pos_y + 1 : pos_y - 1
             @matrix[pos_y, pos_x] += 1
           end
         end
@@ -60,10 +60,10 @@ module Day05
 
     def parse_content(content)
       content.split("\n").map do |line|
-        from, to = line.split('->')
+        from, to = line.split("->")
 
-        x1, y1 = from.strip.split(',').map(&:to_i)
-        x2, y2 = to.strip.split(',').map(&:to_i)
+        x1, y1 = from.strip.split(",").map(&:to_i)
+        x2, y2 = to.strip.split(",").map(&:to_i)
 
         [OpenStruct.new(x: x1, y: y1), OpenStruct.new(x: x2, y: y2)]
       end
@@ -71,10 +71,10 @@ module Day05
   end
 end
 
-test = read_file('test.txt')
-real = read_file('input.txt')
+test = read_file("test.txt")
+real = read_file("input.txt")
 
-puts 'Part1 Test', Day05::Solver.new(test).solve
-puts 'Part1', Day05::Solver.new(real).solve
-puts 'Part2 Test', Day05::Solver.new(test).solve2
-puts 'Part2', Day05::Solver.new(real).solve2
+puts "Part1 Test", Day05::Solver.new(test).solve
+puts "Part1", Day05::Solver.new(real).solve
+puts "Part2 Test", Day05::Solver.new(test).solve2
+puts "Part2", Day05::Solver.new(real).solve2

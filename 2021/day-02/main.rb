@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'ostruct'
+require "ostruct"
 
 def compare_solutions(expected, actual)
   raise "Expected #{expected} but got #{actual}" unless expected == actual
@@ -40,24 +40,24 @@ end
 def parse_content(filename)
   read_file(filename).split("\n").map do |string|
     point = OpenStruct.new(x: 0, y: 0)
-    direction = string.split(' ')
+    direction = string.split(" ")
     increase = direction[1].to_i
     case direction.first
-    when 'forward'
+    when "forward"
       point.x = 1 * increase
-    when 'up'
+    when "up"
       point.y = -1 * increase
-    when 'down'
+    when "down"
       point.y = 1 * increase
     else
-      raise 'Unknown direction'
+      raise "Unknown direction"
     end
     point
   end
 end
 
-compare_solutions(150, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+compare_solutions(150, solve("test.txt"))
+puts "Part1", solve("input.txt")
 
-compare_solutions(900, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+compare_solutions(900, solve2("test.txt"))
+puts "Part2", solve2("input.txt")
