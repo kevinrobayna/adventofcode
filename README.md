@@ -11,10 +11,7 @@ to have a huge amount of setup so that the IDE can help me with the code.
 ## Structure
 
 I'm currently using the [aoc2md](https://github.com/kevinrobayna/aoc2md) cli so that I can
-download the problem description and the input.
+download the problem description, the input and a template for the solution.
 
-For example for the year 2021 and the day 5 I'd execute `aoc2md -y 2021 -d 5` so that the cli would
+For example for the year 2021 and the day 5 I'd execute `aoc2md -y 2021 -d 5 -lang ruby` so that the cli would
 download the problem in the folder 2021
-
-Although I use a script to setup every day so that I avoid myself copying and pasting the same template over and over
-again.
