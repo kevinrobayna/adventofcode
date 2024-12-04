@@ -20,7 +20,7 @@ module Day07
       costs = [average.floor, average.round].map do |avg|
         movements = @content.map do |x|
           steps = (x - avg).abs
-          extra = steps.times.map { |y| y }.sum
+          extra = Array.new(steps) { |y| y }.sum
           steps + extra
         end
         movements.sum

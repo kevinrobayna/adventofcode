@@ -73,7 +73,7 @@ def solve2(filename)
 end
 
 def calculate_tail_positions(filename, knot_count)
-  knots = knot_count.times.map { Knot.new }
+  knots = Array.new(knot_count) { Knot.new }
 
   read_file(filename).each_line.map do |line|
     direction, movement = line.split(' ')

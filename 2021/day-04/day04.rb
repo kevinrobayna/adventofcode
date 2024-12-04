@@ -69,9 +69,7 @@ module Day04
 
     def winning_board?(inx)
       5.times do |z|
-        if (0...5).map { |x| @visited[inx][z, x] }.sum == 5 || (0...5).map { |x| @visited[inx][x, z] }.sum == 5
-          return true
-        end
+        return true if (0...5).map { |x| @visited[inx][z, x] }.sum == 5 || (0...5).map { |x| @visited[inx][x, z] }.sum == 5
       end
       false
     end
