@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "pry"
+require 'pry'
 
 def compare_solutions(expected, actual)
   raise "Expected #{expected} but got #{actual}" unless expected == actual
@@ -33,7 +33,7 @@ def solve2(filename)
     pattern.each_with_index do |line, inx_x|
       line.each_with_index do |char, inx_y|
         pattern_x = pattern.map(&:dup)
-        pattern_x[inx_x][inx_y] = (char == "#") ? "." : "#"
+        pattern_x[inx_x][inx_y] = char == '#' ? '.' : '#'
         columns += find_matching(pattern_x)
         rows += find_matching(pattern_x.transpose)
       end
@@ -61,8 +61,8 @@ def find_matching(pattern)
   end.reduce(&:&)
 end
 
-compare_solutions(405, solve("test.txt"))
-puts "Part1", solve("input.txt")
+compare_solutions(405, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(400, solve2("test.txt"))
-puts "Part2", solve2("input.txt")
+compare_solutions(400, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

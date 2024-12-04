@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require "pry"
-require "minitest/autorun"
+require 'pry'
+require 'minitest/autorun'
 
 def read_file(filename)
   # Get the directory of the currently executing script
@@ -22,11 +22,11 @@ end
 
 class AoCTest < Minitest::Test
   def test_solve
-    assert solve("test.txt") == 0
+    assert solve('test.txt').zero?
   end
 
   def test_solve2
-    assert solve2("test.txt") == 0
+    assert solve2('test.txt').zero?
   end
 end
 

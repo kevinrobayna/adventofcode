@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "pry"
+require 'pry'
 def compare_solutions(expected, actual)
   raise "Expected #{expected} but got #{actual}" unless expected == actual
 
@@ -16,24 +16,24 @@ end
 
 def parse_problem(filename)
   read_file(filename).each_line.map do |line|
-    _, numbers = line.split(":")
-    left, right = numbers.split("|")
-    left.strip.split(" ").sort & right.strip.split(" ").sort
+    _, numbers = line.split(':')
+    left, right = numbers.split('|')
+    left.strip.split(' ').sort & right.strip.split(' ').sort
   end
 end
 
 def solve(filename)
   parse_problem(filename).reduce(0) do |acc, numbers|
     acc + if numbers.empty?
-      0
-    elsif numbers.length == 1
-      1
-    else
-      result = 1
-      (numbers.length - 1).times { result *= 2 }
+            0
+          elsif numbers.length == 1
+            1
+          else
+            result = 1
+            (numbers.length - 1).times { result *= 2 }
 
-      result
-    end
+            result
+          end
   end
 end
 
@@ -51,8 +51,8 @@ def solve2(filename)
   scratchcards.tally.values.sum
 end
 
-compare_solutions(13, solve("test.txt"))
-puts "Part1", solve("input.txt")
+compare_solutions(13, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(30, solve2("test.txt"))
-puts "Part2", solve2("input.txt")
+compare_solutions(30, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

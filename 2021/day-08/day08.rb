@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require "ostruct"
+require 'ostruct'
 
 def read_file(*)
-  File.read(File.join(File.absolute_path(""), *))
+  File.read(File.join(File.absolute_path(''), *))
 end
 
 module Day08
@@ -40,17 +40,17 @@ module Day08
 
     def parse_content(content)
       content.split("\n").map do |line|
-        input, output = line.split("|")
-        {entry: input.strip.split(" "), output: output.strip.split(" ")}
+        input, output = line.split('|')
+        { entry: input.strip.split(' '), output: output.strip.split(' ') }
       end
     end
   end
 end
 
-test = read_file("test.txt")
-real = read_file("input.txt")
+test = read_file('test.txt')
+real = read_file('input.txt')
 
-puts "Part1 Test", Day08::Solver.new(test).solve
-puts "Part1", Day08::Solver.new(real).solve
-puts "Part2 Test", Day08::Solver.new(test).solve2
-puts "Part2", Day08::Solver.new(real).solve2
+puts 'Part1 Test', Day08::Solver.new(test).solve
+puts 'Part1', Day08::Solver.new(real).solve
+puts 'Part2 Test', Day08::Solver.new(test).solve2
+puts 'Part2', Day08::Solver.new(real).solve2

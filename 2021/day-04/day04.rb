@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require "matrix"
+require 'matrix'
 
 def read_file(*)
-  File.read(File.join(File.absolute_path(""), *))
+  File.read(File.join(File.absolute_path(''), *))
 end
 
 module Day04
@@ -78,13 +78,13 @@ module Day04
 
     def parse_content(content)
       lines = content.split("\n")
-      numbers = lines[0].split(",").reject(&:empty?).map(&:to_i)
+      numbers = lines[0].split(',').reject(&:empty?).map(&:to_i)
       filtered_lines = lines.select { |num| num != lines[0] && !num.empty? }
       data = []
       rows = []
 
       filtered_lines.each_with_index do |line, row|
-        rows.append(line.split(" ").reject(&:empty?).map(&:to_i))
+        rows.append(line.split(' ').reject(&:empty?).map(&:to_i))
         if row.positive? && ((row + 1) % 5).zero?
           data.append(Matrix.rows(rows))
           rows = []
@@ -95,10 +95,10 @@ module Day04
   end
 end
 
-test = read_file("test.txt")
-real = read_file("input.txt")
+test = read_file('test.txt')
+real = read_file('input.txt')
 
-puts "Part1 Test", Day04::Solver.new(test).solve
-puts "Part1", Day04::Solver.new(real).solve
-puts "Part2 Test", Day04::Solver.new(test).solve2
-puts "Part2", Day04::Solver.new(real).solve2
+puts 'Part1 Test', Day04::Solver.new(test).solve
+puts 'Part1', Day04::Solver.new(real).solve
+puts 'Part2 Test', Day04::Solver.new(test).solve2
+puts 'Part2', Day04::Solver.new(real).solve2

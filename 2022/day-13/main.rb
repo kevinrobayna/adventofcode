@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "json"
+require 'json'
 
 def compare_solutions(expected, actual)
   raise "Expected #{expected} but got #{actual}" unless expected == actual
@@ -33,7 +33,7 @@ def solve(filename)
     pair_inx += 1
   end
 
-  puts "\n== Results == [#{index_sum.join(", ")}]"
+  puts "\n== Results == [#{index_sum.join(', ')}]"
   index_sum.sum
 end
 
@@ -41,10 +41,10 @@ def compare(left, right)
   puts "- Compare #{left} vs #{right}"
   if left.instance_of?(Integer) && right.instance_of?(Integer)
     if left < right
-      puts "- Left side is smaller, so inputs are in the right order"
+      puts '- Left side is smaller, so inputs are in the right order'
       return 1
     elsif left > right
-      puts "- Right side is smaller, so inputs are not in the right order"
+      puts '- Right side is smaller, so inputs are not in the right order'
       return -1
     end
   elsif left.instance_of?(Array) && right.instance_of?(Array)
@@ -55,23 +55,23 @@ def compare(left, right)
       return result if result.positive? || result.negative?
     end
     if left.length < right.length
-      puts "- Left side ran out of items, so inputs are in the right order"
+      puts '- Left side ran out of items, so inputs are in the right order'
       return 1
     elsif left.length > right.length
-      puts "- Right side ran out of items, so inputs are not in the right order"
+      puts '- Right side ran out of items, so inputs are not in the right order'
       return -1
     end
   elsif left.instance_of?(Array) || right.instance_of?(Array)
     if left.instance_of?(Array)
       if right.nil?
-        puts "- Right side ran out of items, so inputs are not in the right order"
+        puts '- Right side ran out of items, so inputs are not in the right order'
         return -1
       end
       puts "- Mixed types; convert right to [#{right}] and retry comparison"
       result = compare(left, [right])
     else
       if left.nil?
-        puts "- Left side ran out of items, so inputs are in the right order"
+        puts '- Left side ran out of items, so inputs are in the right order'
         return 1
       end
       puts "- Mixed types; convert left to [#{left}] and retry comparison"
@@ -97,8 +97,8 @@ def solve2(filename)
   div_one * div_two
 end
 
-compare_solutions(13, solve("test.txt"))
-puts "Part1", solve("input.txt")
+compare_solutions(13, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(140, solve2("test.txt"))
-puts "Part2", solve2("input.txt")
+compare_solutions(140, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

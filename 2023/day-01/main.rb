@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require "pry"
-require "minitest/autorun"
+require 'pry'
+require 'minitest/autorun'
 
 class Object
   def number?
@@ -61,17 +61,17 @@ end
 
 class AoCTest < Minitest::Test
   def test_solve
-    assert solve("test.txt") == 142
+    assert solve('test.txt') == 142
   end
 
   def test_solve2
-    assert solve2("test.txt") == 142
+    assert solve2('test.txt') == 142
   end
 
   def test_solve2_with_different_input
-    assert solve2("test2.txt") == 281
+    assert solve2('test2.txt') == 281
   end
 end
 
-puts "Part1", solve("input.txt")
-puts "Part2", solve2("input.txt")
+puts 'Part1', solve('input.txt')
+puts 'Part2', solve2('input.txt')

@@ -46,30 +46,30 @@ def solve2(filename)
 end
 
 def parse_content(filename)
-  root = Node.new("/")
+  root = Node.new('/')
   directories = [root]
   current_node = root
   reading_ls = false
   read_file(filename).each_line do |line|
-    if line.include? "$"
-      _, cmd, name = line.split(" ")
+    if line.include? '$'
+      _, cmd, name = line.split(' ')
       case cmd
-      when "cd"
+      when 'cd'
         current_node = case name
-        when "/"
-          root
-        when ".."
-          current_node.parent
-        else
-          current_node.neighbors.find { |n| n.name == name }
-        end
-      when "ls"
+                       when '/'
+                         root
+                       when '..'
+                         current_node.parent
+                       else
+                         current_node.neighbors.find { |n| n.name == name }
+                       end
+      when 'ls'
         reading_ls = true
         next
       end
     elsif reading_ls
-      first, name = line.split(" ")
-      if first == "dir"
+      first, name = line.split(' ')
+      if first == 'dir'
         n = Node.new(name, 0, current_node)
         current_node.neighbors << n
         directories << n
@@ -102,8 +102,8 @@ def traverse_tree(root)
   end
 end
 
-compare_solutions(95_437, solve("test.txt"))
-puts "Part1", solve("input.txt")
+compare_solutions(95_437, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(24_933_642, solve2("test.txt"))
-puts "Part2", solve2("input.txt")
+compare_solutions(24_933_642, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

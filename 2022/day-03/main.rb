@@ -13,7 +13,7 @@ def read_file(filename)
   File.read(File.join(__dir__, filename))
 end
 
-ALPHABET = ("a".."z").to_a + ("A".."Z").to_a
+ALPHABET = ('a'..'z').to_a + ('A'..'Z').to_a
 
 def solve(filename)
   read_file(filename).split("\n").map do |line|
@@ -42,8 +42,8 @@ def find_matching_char(slice)
   hash.select { |_k, v| v.positive? }.keys.first
 end
 
-compare_solutions(157, solve("test.txt"))
-puts "Part1", solve("input.txt")
+compare_solutions(157, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(70, solve2("test.txt"))
-puts "Part2", solve2("input.txt")
+compare_solutions(70, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

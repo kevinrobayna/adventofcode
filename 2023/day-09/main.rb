@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "pry"
+require 'pry'
 
 def compare_solutions(expected, actual)
   raise "Expected #{expected} but got #{actual}" unless expected == actual
@@ -30,7 +30,7 @@ def solve2(filename)
 end
 
 def explore_history(filename)
-  read_file(filename).each_line.map { |line| line.split(" ").map(&:to_i) }.map do |current|
+  read_file(filename).each_line.map { |line| line.split(' ').map(&:to_i) }.map do |current|
     values = [current]
     row = 0
     until values[row].all?(&:zero?)
@@ -43,9 +43,9 @@ def explore_history(filename)
   end
 end
 
-compare_solutions(114, solve("test.txt"))
-puts "Part1", solve("input.txt")
+compare_solutions(114, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(5, solve2("test2.txt"))
-compare_solutions(2, solve2("test.txt"))
-puts "Part2", solve2("input.txt")
+compare_solutions(5, solve2('test2.txt'))
+compare_solutions(2, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

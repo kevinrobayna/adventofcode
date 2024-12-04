@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "matrix"
+require 'matrix'
 
 def compare_solutions(expected, actual)
   raise "Expected #{expected} but got #{actual}" unless expected == actual
@@ -130,8 +130,8 @@ def calculate_scenic_score(trees, inx_i, inx_j)
   count_up * count_down * count_left * count_right
 end
 
-compare_solutions(21, solve("test.txt"))
-puts "Part1", solve("input.txt")
+compare_solutions(21, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(8, solve2("test.txt"))
-puts "Part2", solve2("input.txt")
+compare_solutions(8, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

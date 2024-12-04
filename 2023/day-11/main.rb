@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require "pry"
-require "colorize"
+require 'pry'
+require 'colorize'
 
 def compare_solutions(expected, actual)
   raise "Expected #{expected} but got #{actual}" unless expected == actual
@@ -27,8 +27,8 @@ def solve(filename, difference = 2)
 
   small_grid.each_with_index do |row, inx_x|
     row.each_with_index do |v, inx_y|
-      positions << [inx_x, inx_y] if v == "#"
-      if small_grid.none? { |r| r[inx_y] == "#" } && !row.include?("#")
+      positions << [inx_x, inx_y] if v == '#'
+      if small_grid.none? { |r| r[inx_y] == '#' } && !row.include?('#')
         empty_rows << inx_x
         empty_columns << inx_y
       end
@@ -57,9 +57,9 @@ end
 def debug_board(board)
   board.each_with_index.map do |row, _inx_x|
     row.each_with_index.map do |v, inx_y|
-      if v != "."
+      if v != '.'
         v.red
-      elsif board.none? { |r| r[inx_y] == "#" } && !row.include?("#")
+      elsif board.none? { |r| r[inx_y] == '#' } && !row.include?('#')
         v.green
       else
         v.blue
@@ -68,8 +68,8 @@ def debug_board(board)
   end.map(&:join).join("\n")
 end
 
-compare_solutions(374, solve("test.txt", 2))
-compare_solutions(1030, solve("test.txt", 10))
-compare_solutions(8410, solve("test.txt", 100))
-puts "Part1", solve("input.txt", 2)
-puts "Part2", solve("input.txt", 1_000_000)
+compare_solutions(374, solve('test.txt', 2))
+compare_solutions(1030, solve('test.txt', 10))
+compare_solutions(8410, solve('test.txt', 100))
+puts 'Part1', solve('input.txt', 2)
+puts 'Part2', solve('input.txt', 1_000_000)

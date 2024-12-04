@@ -7,11 +7,11 @@ def compare_solutions(expected, actual)
 end
 
 def read_file(*)
-  File.read(File.join(File.absolute_path(""), *))
+  File.read(File.join(File.absolute_path(''), *))
 end
 
 def solve(filename)
-  content = read_file(filename).split("\n").map { |line| line.chars }
+  content = read_file(filename).split("\n").map(&:chars)
   content.each_index.map do |expression|
     find_invalid_char(content, expression, [content[expression].first], 0)
   end.sum
@@ -24,7 +24,7 @@ end
 
 def find_invalid_char(content, expression, openings, position)
   next_pos = position + 1
-  found = content[expression][next_pos] || "END"
+  found = content[expression][next_pos] || 'END'
   expected = get_closings(openings.last)
   if opening? found
     openings.append found
@@ -37,7 +37,7 @@ def find_invalid_char(content, expression, openings, position)
     chars_until_end = ((next_pos + 1)...(content[expression].size)).map { |x| content[expression][x] }.join
     colored_found = "\e[0;31m#{found}\e[0m"
     points = calculate_score(found)
-    if found == "END"
+    if found == 'END'
       puts "#{expression} - #{chars_until_now}\e Expected #{expected}, but found #{colored_found} instead"
     else
       puts "#{expression} -#{chars_until_now}#{colored_found}#{chars_until_end} Expected #{expected}, but found #{found} instead. Points: #{points}"
@@ -48,13 +48,13 @@ end
 
 def calculate_score(char)
   case char
-  when ")"
+  when ')'
     3
-  when "]"
+  when ']'
     57
-  when "}"
+  when '}'
     1197
-  when ">"
+  when '>'
     25_137
   else
     0
@@ -63,14 +63,14 @@ end
 
 def get_opening(char)
   case char
-  when ")"
-    "("
-  when "]"
-    "["
-  when "}"
-    "{"
-  when ">"
-    "<"
+  when ')'
+    '('
+  when ']'
+    '['
+  when '}'
+    '{'
+  when '>'
+    '<'
   else
     raise ArgumentError
   end
@@ -78,16 +78,16 @@ end
 
 def get_closings(char)
   case char
-  when "("
-    ")"
-  when "["
-    "]"
-  when "{"
-    "}"
-  when "<"
-    ">"
+  when '('
+    ')'
+  when '['
+    ']'
+  when '{'
+    '}'
+  when '<'
+    '>'
   else
-    "END"
+    'END'
   end
 end
 
@@ -95,8 +95,8 @@ def opening?(char)
   %w|( [ { <|.include? char
 end
 
-compare_solutions(26_397, solve("test.txt"))
-puts "Part1", solve("input.txt")
+compare_solutions(26_397, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(288_957, solve2("test.txt"))
-puts "Part2", solve2("input.txt")
+compare_solutions(288_957, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

@@ -15,16 +15,16 @@ end
 
 def solve(filename)
   content = read_file(filename).split("\n")
-  gamma = ""
-  epsilon = ""
+  gamma = ''
+  epsilon = ''
   (0...content.first.length).each do |index|
     zeros, ones = find_most_common_digits(content, index)
     if zeros > ones
-      gamma << "0"
-      epsilon << "1"
+      gamma << '0'
+      epsilon << '1'
     else
-      gamma << "1"
-      epsilon << "0"
+      gamma << '1'
+      epsilon << '0'
     end
   end
 
@@ -67,10 +67,10 @@ def find_most_common_digits(values, index)
   [zeros, (values.count - zeros).abs]
 end
 
-compare_solutions(198, solve("test.txt"))
-puts "Part1", solve("input.txt")
+compare_solutions(198, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(230, solve2("test.txt"))
-puts "Part2", solve2("input.txt")
+compare_solutions(230, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')
 
 # rubocop:enable Style/FrozenStringLiteralComment

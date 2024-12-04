@@ -20,7 +20,7 @@ def solve2(filename)
   0
 end
 
-class AoCTest &lt; Minitest::Test
+class AoCTest < Minitest::Test
   def test_solve
     assert solve("test.txt") == 0
   end

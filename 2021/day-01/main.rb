@@ -39,8 +39,8 @@ def count_increases(numbers)
   counter
 end
 
-compare_solutions(7, solve("test.txt"))
-puts "Part1", solve("input.txt")
+compare_solutions(7, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(5, solve2("test.txt"))
-puts "Part2", solve2("input.txt")
+compare_solutions(5, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

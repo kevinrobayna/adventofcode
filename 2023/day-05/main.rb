@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "pry"
+require 'pry'
 
 class Range
   def overlaps?(other)
@@ -13,7 +13,7 @@ class Range
     [self.begin, other.begin].max..[max, other.end].min
   end
 
-  alias_method :&, :intersection
+  alias & intersection
 end
 
 def compare_solutions(expected, actual)
@@ -32,9 +32,9 @@ end
 def parse_file(filename)
   seeds = []
   map_info = {}
-  map_key = ""
+  map_key = ''
   read_file(filename).each_line do |line|
-    if line.match?("seeds:")
+    if line.match?('seeds:')
       seeds = line.scan(/\d+/).map(&:to_i)
     elsif /(.*)\smap:/.match?(line)
       map_key = line.match(/(.*)\smap:/)[1]
@@ -42,7 +42,7 @@ def parse_file(filename)
     elsif /\d+\s\d+\s\d+/.match?(line)
       dest, orig, range = line.scan(/\d+/).map(&:to_i)
       map_info[map_key.to_sym] << [orig...(orig + range), dest - orig]
-    elsif map_key != ""
+    elsif map_key != ''
       sorted = map_info[map_key.to_sym].sort_by { |r, _d| r.begin }
       min_range = sorted.first.first.begin
       max_range = sorted.last.first.end
@@ -50,7 +50,7 @@ def parse_file(filename)
       sorted << [max_range...1_000_000_000_000, 0]
 
       map_info[map_key.to_sym] = sorted
-      map_key = ""
+      map_key = ''
     end
   end
   [seeds, map_info]
@@ -90,8 +90,8 @@ def solve2(filename)
   solution.last.map(&:begin).min
 end
 
-compare_solutions(35, solve("test.txt"))
-puts "Part1", solve("input.txt")
+compare_solutions(35, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(46, solve2("test.txt"))
-puts "Part2", solve2("input.txt")
+compare_solutions(46, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

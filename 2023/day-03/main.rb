@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require "pry"
-require "colorize"
+require 'pry'
+require 'colorize'
 
 class Object
   def number?
@@ -45,7 +45,7 @@ def solve(filename)
         next if next_y >= board.first.length
 
         next_v = board[next_x][next_y]
-        next if next_v == "." || next_v.number?
+        next if next_v == '.' || next_v.number?
 
         true
       end
@@ -71,7 +71,7 @@ def solve2(filename)
         next if next_y >= board.first.length
 
         next_v = board[next_x][next_y]
-        next unless next_v == "*"
+        next unless next_v == '*'
 
         true
       end
@@ -82,7 +82,7 @@ def solve2(filename)
   products = []
   board.each_with_index do |row, inx_x|
     row.each_with_index do |v, inx_y|
-      next unless v == "*"
+      next unless v == '*'
 
       neighbours = []
       MOVEMENTS.each do |mov_x, mov_y|
@@ -135,8 +135,8 @@ end
 def debug_board(board, valid_parts)
   board.each_with_index do |row, inx_x|
     row.each_with_index do |v, inx_y|
-      board[inx_x][inx_y] = v.green if v != "." && v != "*" && !v.number?
-      board[inx_x][inx_y] = v.red if v == "*"
+      board[inx_x][inx_y] = v.green if v != '.' && v != '*' && !v.number?
+      board[inx_x][inx_y] = v.red if v == '*'
     end
   end
   valid_parts.each_value do |positions|
@@ -147,10 +147,10 @@ def debug_board(board, valid_parts)
   puts board.map(&:join).join("\n")
 end
 
-compare_solutions(4361, solve("test.txt"))
-compare_solutions(4361, solve("test2.txt"))
-compare_solutions(557_705, solve("input.txt"))
-puts "Part1", solve("input.txt")
+compare_solutions(4361, solve('test.txt'))
+compare_solutions(4361, solve('test2.txt'))
+compare_solutions(557_705, solve('input.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(467_835, solve2("test.txt"))
-puts "Part2", solve2("input.txt")
+compare_solutions(467_835, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

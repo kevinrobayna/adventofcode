@@ -14,10 +14,10 @@ def read_file(filename)
 end
 
 MOVEMENTS = {
-  "R" => [1, 0],
-  "L" => [-1, 0],
-  "U" => [0, 1],
-  "D" => [0, -1]
+  'R' => [1, 0],
+  'L' => [-1, 0],
+  'U' => [0, 1],
+  'D' => [0, -1]
 }.freeze
 
 class Knot
@@ -47,8 +47,8 @@ class Knot
 
     move_x = other.pos_x - @pos_x
     move_y = other.pos_y - @pos_y
-    @pos_x += (move_x.abs == 2) ? move_x / 2 : move_x
-    @pos_y += (move_y.abs == 2) ? move_y / 2 : move_y
+    @pos_x += move_x.abs == 2 ? move_x / 2 : move_x
+    @pos_y += move_y.abs == 2 ? move_y / 2 : move_y
 
     @memory.add([@pos_x, @pos_y])
   end
@@ -76,7 +76,7 @@ def calculate_tail_positions(filename, knot_count)
   knots = knot_count.times.map { Knot.new }
 
   read_file(filename).each_line.map do |line|
-    direction, movement = line.split(" ")
+    direction, movement = line.split(' ')
     movement.to_i.times do
       knots.each.with_index do |knot, inx|
         if inx.zero?
@@ -90,9 +90,9 @@ def calculate_tail_positions(filename, knot_count)
   knots.last.steps
 end
 
-compare_solutions(13, solve("test.txt"))
-puts "Part1", solve("input.txt")
+compare_solutions(13, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(1, solve2("test.txt"))
-compare_solutions(36, solve2("test2.txt"))
-puts "Part2", solve2("input.txt")
+compare_solutions(1, solve2('test.txt'))
+compare_solutions(36, solve2('test2.txt'))
+puts 'Part2', solve2('input.txt')

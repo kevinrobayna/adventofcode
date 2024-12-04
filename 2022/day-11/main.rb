@@ -22,7 +22,7 @@ def parse_input(filename)
   if_true = nil
   read_file(filename).each_line do |line|
     line.strip.match(/Starting items: (.*)/) do |match|
-      items = match[1].split(",").map(&:strip).map(&:to_i)
+      items = match[1].split(',').map(&:strip).map(&:to_i)
     end
 
     line.strip.match(/Operation: new = old (.) (.*)/) do |match|
@@ -86,17 +86,17 @@ class Monkey
   end
 
   def operate(item)
-    by = if @by == "old"
-      item
-    else
-      @by.to_i
-    end
+    by = if @by == 'old'
+           item
+         else
+           @by.to_i
+         end
     case @operation
-    when "+"
+    when '+'
       item + by
-    when "*"
+    when '*'
       item * by
-    when "old"
+    when 'old'
       item * item
     else
       raise "Unknown operation: #{@operation}"
@@ -105,7 +105,7 @@ class Monkey
 
   def to_s
     "Monkey:
-  Starting items: #{@items.join(", ")}
+  Starting items: #{@items.join(', ')}
   Operation: new = old #{@operation} #{@by}
   Test: divisible by #{@divisible_by}
     If true: throw to monkey #{@to_throw[0]}
@@ -149,8 +149,8 @@ def solve2(filename)
   inspected_items[0] * inspected_items[1]
 end
 
-compare_solutions(10_605, solve("test.txt"))
-puts "Part1", solve("input.txt")
+compare_solutions(10_605, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(2_713_310_158, solve2("test.txt"))
-puts "Part2", solve2("input.txt")
+compare_solutions(2_713_310_158, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

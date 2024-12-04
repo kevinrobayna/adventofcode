@@ -28,7 +28,7 @@ end
 
 def parse_input(filename)
   read_file(filename).each_char.map do |char|
-    if char == "("
+    if char == '('
       1
     else
       -1
@@ -36,8 +36,8 @@ def parse_input(filename)
   end
 end
 
-compare_solutions(-1, solve("test.txt"))
-puts "Part1", solve("input.txt")
+compare_solutions(-1, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(5, solve2("test.txt"))
-puts "Part2", solve2("input.txt")
+compare_solutions(5, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

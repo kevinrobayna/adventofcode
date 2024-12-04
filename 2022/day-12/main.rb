@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "matrix"
+require 'matrix'
 
 def compare_solutions(expected, actual)
   raise "Expected #{expected} but got #{actual}" unless expected == actual
@@ -16,20 +16,20 @@ def read_file(filename)
 end
 
 def parse_file(filename)
-  alphabet = ("a".."z").to_a
+  alphabet = ('a'..'z').to_a
   lines = read_file(filename).split("\n")
   m = Matrix.zero(lines.length, lines[0].length)
   start = nil
   finish = nil
   lines.each_with_index do |line, inx_i|
     line.chars.each_with_index do |letter, inx_j|
-      if letter == "E"
-        m[inx_i, inx_j] = alphabet.index("z")
+      if letter == 'E'
+        m[inx_i, inx_j] = alphabet.index('z')
         finish = [inx_i, inx_j]
         next
       end
-      if letter == "S"
-        m[inx_i, inx_j] = alphabet.index("a")
+      if letter == 'S'
+        m[inx_i, inx_j] = alphabet.index('a')
         start = [inx_i, inx_j]
         next
       end
@@ -133,8 +133,8 @@ def find_shortest_path(grid, start, finish)
   end
 end
 
-compare_solutions(31, solve("test.txt"))
-puts "Part1", solve("input.txt")
+compare_solutions(31, solve('test.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(29, solve2("test.txt"))
-puts "Part2", solve2("input.txt")
+compare_solutions(29, solve2('test.txt'))
+puts 'Part2', solve2('input.txt')

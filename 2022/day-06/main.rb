@@ -28,19 +28,19 @@ def find_position_with_n_unique_chars(number_of_unique_chars, content)
     sequence = content[(index - number_of_unique_chars)...index]
     return index if sequence.chars.uniq.length == number_of_unique_chars
   end
-  raise "No solution found"
+  raise 'No solution found'
 end
 
-compare_solutions(7, solve("test.txt"))
-compare_solutions(5, solve("test2.txt"))
-compare_solutions(6, solve("test3.txt"))
-compare_solutions(10, solve("test4.txt"))
-compare_solutions(11, solve("test5.txt"))
-puts "Part1", solve("input.txt")
+compare_solutions(7, solve('test.txt'))
+compare_solutions(5, solve('test2.txt'))
+compare_solutions(6, solve('test3.txt'))
+compare_solutions(10, solve('test4.txt'))
+compare_solutions(11, solve('test5.txt'))
+puts 'Part1', solve('input.txt')
 
-compare_solutions(19, solve2("test.txt"))
-compare_solutions(23, solve2("test2.txt"))
-compare_solutions(23, solve2("test3.txt"))
-compare_solutions(29, solve2("test4.txt"))
-compare_solutions(26, solve2("test5.txt"))
-puts "Part2", solve2("input.txt")
+compare_solutions(19, solve2('test.txt'))
+compare_solutions(23, solve2('test2.txt'))
+compare_solutions(23, solve2('test3.txt'))
+compare_solutions(29, solve2('test4.txt'))
+compare_solutions(26, solve2('test5.txt'))
+puts 'Part2', solve2('input.txt')
