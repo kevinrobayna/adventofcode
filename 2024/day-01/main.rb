@@ -11,22 +11,43 @@ def read_file(filename)
 end
 
 def solve(filename)
-  read_file(filename)
-  0
+  left = []
+  right = []
+  read_file(filename).lines.map(&:chomp).map(&:split).each do |l, r|
+    left << l.to_i
+    right << r.to_i
+  end
+
+  left.sort!
+  right.sort!
+
+  left.each.with_index.sum do |l, i|
+    (l - right[i]).abs
+  end
 end
 
 def solve2(filename)
-  read_file(filename)
-  0
+  left = []
+  right = []
+  read_file(filename).lines.map(&:chomp).map(&:split).each do |l, r|
+    left << l.to_i
+    right << r.to_i
+  end
+
+  group = right.tally
+
+  left.sum do |l|
+    l * (group[l] || 0)
+  end
 end
 
 class AoCTest < Minitest::Test
   def test_solve
-    assert solve('test.txt').zero?
+    assert_equal 11, solve('test.txt')
   end
 
   def test_solve2
-    assert solve2('test.txt').zero?
+    assert_equal 31, solve2('test.txt')
   end
 end
 
