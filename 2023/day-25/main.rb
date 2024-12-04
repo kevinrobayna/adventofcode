@@ -22,11 +22,11 @@ end
 
 class AoCTest < Minitest::Test
   def test_solve
-    assert solve('test.txt').zero?
+    assert_equal 0, solve('test.txt')
   end
 
   def test_solve2
-    assert solve2('test.txt').zero?
+    assert_equal 0, solve2('test.txt')
   end
 end
 
