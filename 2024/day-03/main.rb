@@ -11,22 +11,46 @@ def read_file(filename)
 end
 
 def solve(filename)
-  read_file(filename)
-  0
+  regex = /mul\((\d+),(\d+)\)/
+  read_file(filename).scan(regex).reduce(0) do |acc, (a, b)|
+    acc += a.to_i * b.to_i
+    acc
+  end
 end
 
 def solve2(filename)
-  read_file(filename)
-  0
+  regex = /(mul\((\d+),(\d+)\)|do\(\)|don't\(\))/
+  matches = read_file(filename).scan(regex)
+
+  found_don_t = false
+  filtered_matches = matches.map do |match, f, s|
+    if match == 'do()'
+      found_don_t = false
+      [match, 0]
+    elsif match == "don't()"
+      found_don_t = true
+      [match, 0]
+    elsif match.start_with?('mul')
+      if found_don_t
+        [match, 0]
+      else
+        [match, f.to_i * s.to_i]
+      end
+    else
+      raise "Unknown match: #{match}"
+    end
+  end
+
+  filtered_matches.sum { |(_, b)| b }
 end
 
 class AoCTest < Minitest::Test
   def test_solve
-    assert_equal 0, solve('test.txt')
+    assert_equal 161, solve('test.txt')
   end
 
   def test_solve2
-    assert_equal 0, solve2('test.txt')
+    assert_equal 48, solve2('test.txt')
   end
 end
 
