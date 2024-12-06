@@ -77,10 +77,22 @@ def solve2(input)
 
   solution = 0
   grid.each_with_index do |row, x|
-    row.each_with_index do |_, y|
-      DIRECTIONS.each do |inc_x, inc_y|
-        solution += 1 if xmas_direction?(grid, [x, y], [inc_x, inc_y])
-      end
+    row.each_with_index do |cell, y|
+      next unless cell == 'A'
+      next unless inbound?(grid, [x + UP_LEFT[0], y + UP_LEFT[1]])
+      next unless inbound?(grid, [x + DOWN_RIGHT[0], y + DOWN_RIGHT[1]])
+      next unless inbound?(grid, [x + DOWN_LEFT[0], y + DOWN_LEFT[1]])
+      next unless inbound?(grid, [x + UP_RIGHT[0], y + UP_RIGHT[1]])
+
+      next unless [cell,
+                   grid[x + UP_LEFT[0]][y + UP_LEFT[1]],
+                   grid[x + DOWN_RIGHT[0]][y + DOWN_RIGHT[1]]].sort.join == 'AMS'
+
+      next unless [cell,
+                   grid[x + DOWN_LEFT[0]][y + DOWN_LEFT[1]],
+                   grid[x + UP_RIGHT[0]][y + UP_RIGHT[1]]].sort.join == 'AMS'
+
+      solution += 1
     end
   end
 
@@ -169,7 +181,7 @@ class AoCTest < Minitest::Test
       MAMMMXMMMM
       MXMXAXMASX
     INPUT
-    assert_equal 9, solve(test)
+    assert_equal 9, solve2(test)
   end
 end
 
