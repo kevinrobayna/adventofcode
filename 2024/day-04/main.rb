@@ -40,24 +40,28 @@ def xmas_direction?(grid, pos, direction)
   pos_x, pos_y = pos
   inc_x, inc_y = direction
 
-  return false unless expected_char?(grid, pos, 'X')
+  return false unless inbound?(grid, pos)
+  return false unless grid[pos_x][pos_y] == 'X'
 
   next_x = pos_x + inc_x
   next_y = pos_y + inc_y
-  return false unless expected_char?(grid, [next_x, next_y], 'M')
+  return false unless inbound?(grid, [next_x, next_y])
+  return false unless grid[next_x][next_y] == 'M'
 
   next_x = pos_x + (inc_x * 2)
   next_y = pos_y + (inc_y * 2)
-  return false unless expected_char?(grid, [next_x, next_y], 'A')
+  return false unless inbound?(grid, [next_x, next_y])
+  return false unless grid[next_x][next_y] == 'A'
 
   next_x = pos_x + (inc_x * 3)
   next_y = pos_y + (inc_y * 3)
-  return false unless expected_char?(grid, [next_x, next_y], 'S')
+  return false unless inbound?(grid, [next_x, next_y])
+  return false unless grid[next_x][next_y] == 'S'
 
   true
 end
 
-def expected_char?(grid, pos, char)
+def inbound?(grid, pos)
   next_x, next_y = pos
 
   return false if next_x.negative?
@@ -65,11 +69,22 @@ def expected_char?(grid, pos, char)
   return false if next_y.negative?
   return false if next_y >= grid.first.size
 
-  grid[next_x][next_y] == char
+  true
 end
 
 def solve2(input)
-  input.length
+  grid = input.lines.map { _1.strip.chars }
+
+  solution = 0
+  grid.each_with_index do |row, x|
+    row.each_with_index do |_, y|
+      DIRECTIONS.each do |inc_x, inc_y|
+        solution += 1 if xmas_direction?(grid, [x, y], [inc_x, inc_y])
+      end
+    end
+  end
+
+  solution
 end
 
 class AoCTest < Minitest::Test
