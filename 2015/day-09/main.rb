@@ -1,30 +1,45 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
 
-  puts "Congratulations! Got expected result (#{expected})"
+def route_lengths(input)
+  distances = Hash.new { |h, k| h[k] = {} }
+  input.scan(/(\w+) to (\w+) = (\d+)/).each do |a, b, d|
+    distances[a][b] = distances[b][a] = d.to_i
+  end
+  distances.keys.permutation.map do |route|
+    route.each_cons(2).sum { |a, b| distances[a][b] }
+  end
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+def solve(input)
+  route_lengths(input).min
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def solve2(input)
+  route_lengths(input).max
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    London to Dublin = 464
+    London to Belfast = 518
+    Dublin to Belfast = 141
+  INPUT
+
+  def test_solve_example
+    assert_equal 605, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 251, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 982, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 898, solve2(read_file('input.txt'))
+  end
 end
-
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
-
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')

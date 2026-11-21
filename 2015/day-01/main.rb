@@ -1,43 +1,42 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
 
-  puts "Congratulations! Got expected result (#{expected})"
+def parse_input(input)
+  input.strip.each_char.map { |char| char == '(' ? 1 : -1 }
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+def solve(input)
+  parse_input(input).sum
 end
 
-def solve(filename)
-  parse_input(filename).sum
-end
-
-def solve2(filename)
+def solve2(input)
   floor = 0
-  parse_input(filename).each_with_index do |value, id|
-    return id + 1 if floor + value == -1
-
+  parse_input(input).each_with_index do |value, id|
     floor += value
+    return id + 1 if floor == -1
   end
+  nil
 end
 
-def parse_input(filename)
-  read_file(filename).each_char.map do |char|
-    if char == '('
-      1
-    else
-      -1
-    end
+class AoCTest < Minitest::Test
+  EXAMPLE = '()())'
+
+  def test_solve_example
+    assert_equal(-1, solve(EXAMPLE))
+    assert_equal 3, solve('))(((((')
+  end
+
+  def test_solve_input
+    assert_equal 280, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 5, solve2(EXAMPLE)
+    assert_equal 1, solve2(')')
+  end
+
+  def test_solve2_input
+    assert_equal 1797, solve2(read_file('input.txt'))
   end
 end
-
-compare_solutions(-1, solve('test.txt'))
-puts 'Part1', solve('input.txt')
-
-compare_solutions(5, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')

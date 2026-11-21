@@ -1,30 +1,35 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
 
-  puts "Congratulations! Got expected result (#{expected})"
+require 'digest'
+
+# Finds the lowest n >= start whose MD5("#{key}#{n}") hex digest starts with `prefix`.
+def mine(key, prefix, start: 1)
+  key = key.strip
+  md5 = Digest::MD5.new
+  (start..).find { |n| md5.reset.update(key).update(n.to_s).hexdigest.start_with?(prefix) }
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+def solve(input)
+  mine(input, '00000')
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+# Every 6-zero hash is also a 5-zero hash, so the search can resume from part 1.
+def solve2(input)
+  mine(input, '000000', start: solve(input))
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+class AoCTest < Minitest::Test
+  def test_solve_example
+    assert_equal 609_043, solve('abcdef')
+  end
+
+  def test_solve_input
+    assert_equal 282_749, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_input
+    assert_equal 9_962_624, solve2(read_file('input.txt'))
+  end
 end
-
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
-
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')

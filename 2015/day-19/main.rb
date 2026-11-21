@@ -1,30 +1,56 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
 
-  puts "Congratulations! Got expected result (#{expected})"
+def parse_machine(input)
+  rules, molecule = input.split("\n\n")
+  [rules.scan(/(\w+) => (\w+)/), molecule.strip]
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+def solve(input)
+  rules, molecule = parse_machine(input)
+  rules.each_with_object(Set.new) do |(from, to), results|
+    start = 0
+    while (index = molecule.index(from, start))
+      results << (molecule[0...index] + to + molecule[(index + from.size)..])
+      start = index + 1
+    end
+  end.size
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+# Real inputs follow a grammar where every rule is X => XX, or X => X Rn X (Y X)* Ar.
+# Each step adds one element, Rn/Ar are free and every Y saves two elements, so
+# steps = elements - count(Rn, Ar) - 2 * count(Y) - 1.
+def solve2(input)
+  _, molecule = parse_machine(input)
+  elements = molecule.scan(/[A-Z][a-z]?/)
+  elements.size - elements.count { |e| %w[Rn Ar].include?(e) } - (2 * elements.count('Y')) - 1
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    H => HO
+    H => OH
+    O => HH
+
+    HOH
+  INPUT
+
+  def test_solve_example
+    assert_equal 4, solve(EXAMPLE)
+    assert_equal 7, solve(EXAMPLE.sub('HOH', 'HOHOHO'))
+  end
+
+  def test_solve_input
+    assert_equal 509, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    # Formula only applies to inputs following the real grammar: e => NAl, Al => ThRnFAr.
+    assert_equal 2, solve2("e => NAl\nAl => ThRnFAr\n\nNThRnFAr\n")
+  end
+
+  def test_solve2_input
+    assert_equal 195, solve2(read_file('input.txt'))
+  end
 end
-
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
-
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')

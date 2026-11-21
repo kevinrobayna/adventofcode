@@ -1,30 +1,38 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
 
-  puts "Congratulations! Got expected result (#{expected})"
+def look_and_say(digits)
+  digits.gsub(/(\d)\1*/) { |run| "#{run.length}#{run[0]}" }
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+def look_and_say_length(input, times)
+  times.times.reduce(input.strip) { |digits, _| look_and_say(digits) }.length
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def solve(input)
+  look_and_say_length(input, 40)
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def solve2(input)
+  look_and_say_length(input, 50)
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+class AoCTest < Minitest::Test
+  def test_solve_example
+    assert_equal '11', look_and_say('1')
+    assert_equal '21', look_and_say('11')
+    assert_equal '1211', look_and_say('21')
+    assert_equal '111221', look_and_say('1211')
+    assert_equal '312211', look_and_say('111221')
+    assert_equal 6, look_and_say_length('1', 5)
+  end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+  def test_solve_input
+    assert_equal 492_982, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_input
+    assert_equal 6_989_950, solve2(read_file('input.txt'))
+  end
+end

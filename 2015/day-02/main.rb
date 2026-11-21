@@ -1,30 +1,40 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
 
-  puts "Congratulations! Got expected result (#{expected})"
+def parse_boxes(input)
+  input.lines.map { |line| line.split('x').map(&:to_i).sort }
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+def solve(input)
+  parse_boxes(input).sum do |a, b, c|
+    (2 * ((a * b) + (b * c) + (a * c))) + (a * b)
+  end
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def solve2(input)
+  parse_boxes(input).sum { |a, b, c| (2 * (a + b)) + (a * b * c) }
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    2x3x4
+    1x1x10
+  INPUT
+
+  def test_solve_example
+    assert_equal 58 + 43, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 1_588_178, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 34 + 14, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 3_783_758, solve2(read_file('input.txt'))
+  end
 end
-
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
-
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
