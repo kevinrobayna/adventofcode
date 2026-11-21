@@ -1,30 +1,36 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
 
-  puts "Congratulations! Got expected result (#{expected})"
+def min_fuel(input)
+  crabs = input.scan(/\d+/).map(&:to_i)
+  crabs.min.upto(crabs.max).map { |target| crabs.sum { |c| yield((c - target).abs) } }.min
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+def solve(input)
+  min_fuel(input) { |distance| distance }
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def solve2(input)
+  min_fuel(input) { |distance| distance * (distance + 1) / 2 }
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+class AoCTest < Minitest::Test
+  EXAMPLE = "16,1,2,0,4,2,7,1,2,14\n"
+
+  def test_solve_example
+    assert_equal 37, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 355_764, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 168, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 99_634_572, solve2(read_file('input.txt'))
+  end
 end
-
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
-
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')

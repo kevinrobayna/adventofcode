@@ -1,30 +1,56 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
 
-  puts "Congratulations! Got expected result (#{expected})"
+# Returns all initial velocities whose trajectory hits the target area (assumes target below and right of origin).
+def hitting_velocities(input)
+  x1, x2, y1, y2 = input.scan(/-?\d+/).map(&:to_i)
+  (1..x2).flat_map do |vx0|
+    (y1..-y1).select do |vy0|
+      x = y = 0
+      vx = vx0
+      vy = vy0
+      hit = false
+      while x <= x2 && y >= y1
+        x += vx
+        y += vy
+        vx -= 1 if vx.positive?
+        vy -= 1
+        if x.between?(x1, x2) && y.between?(y1, y2)
+          hit = true
+          break
+        end
+      end
+      hit
+    end.map { |vy0| [vx0, vy0] }
+  end
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+def solve(input)
+  vy = hitting_velocities(input).map(&:last).max
+  vy * (vy + 1) / 2
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def solve2(input)
+  hitting_velocities(input).size
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+class AoCTest < Minitest::Test
+  EXAMPLE = "target area: x=20..30, y=-10..-5\n"
+
+  def test_solve_example
+    assert_equal 45, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 10_011, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 112, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 2994, solve2(read_file('input.txt'))
+  end
 end
-
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
-
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')

@@ -1,30 +1,73 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
 
-  puts "Congratulations! Got expected result (#{expected})"
+def polymerize(input, steps)
+  template, rules_part = input.split("\n\n")
+  rules = rules_part.scan(/(\w\w) -> (\w)/).to_h
+  pairs = template.chars.each_cons(2).map(&:join).tally
+  steps.times do
+    next_pairs = Hash.new(0)
+    pairs.each do |pair, count|
+      insert = rules[pair]
+      if insert
+        next_pairs[pair[0] + insert] += count
+        next_pairs[insert + pair[1]] += count
+      else
+        next_pairs[pair] += count
+      end
+    end
+    pairs = next_pairs
+  end
+  counts = Hash.new(0)
+  pairs.each { |pair, count| counts[pair[0]] += count }
+  counts[template[-1]] += 1
+  counts.values.max - counts.values.min
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+def solve(input)
+  polymerize(input, 10)
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def solve2(input)
+  polymerize(input, 40)
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    NNCB
+
+    CH -> B
+    HH -> N
+    CB -> H
+    NH -> C
+    HB -> C
+    HC -> B
+    HN -> C
+    NN -> C
+    BH -> H
+    NC -> B
+    NB -> B
+    BN -> B
+    BB -> N
+    BC -> B
+    CC -> N
+    CN -> C
+  INPUT
+
+  def test_solve_example
+    assert_equal 1588, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 2797, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 2_188_189_693_529, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 2_926_813_379_532, solve2(read_file('input.txt'))
+  end
 end
-
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
-
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
