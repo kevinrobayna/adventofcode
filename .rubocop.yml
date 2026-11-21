@@ -5,6 +5,7 @@ plugins:
   - rubocop-minitest
 AllCops:
   NewCops: disable
+  SuggestExtensions: false
 Metrics/AbcSize:
   Enabled: false
 Metrics/MethodLength:
