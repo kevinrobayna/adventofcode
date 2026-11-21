@@ -64,7 +64,7 @@ class Path
     return false unless next_x < map.row_count && next_y < map.column_count && next_x >= 0 && next_y >= 0
 
     # We don't want to visit already visited places
-    return false unless (visited[next_x, next_y]).zero?
+    return false unless visited[next_x, next_y].zero?
 
     current_x, current_y = @current
     h = map[current_x, current_y]
