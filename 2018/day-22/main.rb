@@ -1,30 +1,104 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
 
-  puts "Congratulations! Got expected result (#{expected})"
+class Cave
+  attr_reader :tx, :ty
+
+  def initialize(input, margin: 60)
+    @depth, @tx, @ty = input.scan(/\d+/).map(&:to_i)
+    @w = @tx + margin
+    @h = @ty + margin
+    @erosion = Array.new(@h) { Array.new(@w) }
+    @h.times do |y|
+      @w.times do |x|
+        geo = if (x.zero? && y.zero?) || (x == @tx && y == @ty) then 0
+              elsif y.zero? then x * 16_807
+              elsif x.zero? then y * 48_271
+              else @erosion[y][x - 1] * @erosion[y - 1][x]
+              end
+        @erosion[y][x] = (geo + @depth) % 20_183
+      end
+    end
+  end
+
+  # 0 rocky, 1 wet, 2 narrow
+  def type(x, y)
+    @erosion[y][x] % 3
+  end
+
+  def risk
+    (0..@ty).sum { |y| (0..@tx).sum { |x| type(x, y) } }
+  end
+
+  # Tools: 0 neither, 1 torch, 2 climbing gear. A tool is allowed in a region iff tool != type.
+  # Dijkstra with a bucket queue (edge weights are 1 or 7).
+  def fastest
+    best = Array.new(@h * @w * 3, Float::INFINITY)
+    start = 1
+    best[start] = 0
+    buckets = [[start]]
+    t = 0
+    loop do
+      (buckets[t] || []).each do |state|
+        next if best[state] < t
+
+        tool = state % 3
+        cell = state / 3
+        x = cell % @w
+        y = cell / @w
+        return t if x == @tx && y == @ty && tool == 1
+
+        other = 3 - tool - type(x, y)
+        relax(best, buckets, (cell * 3) + other, t + 7)
+        [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]].each do |nx, ny|
+          next if nx.negative? || ny.negative? || nx >= @w || ny >= @h || type(nx, ny) == tool
+
+          relax(best, buckets, (((ny * @w) + nx) * 3) + tool, t + 1)
+        end
+      end
+      buckets[t] = nil
+      t += 1
+    end
+  end
+
+  private
+
+  def relax(best, buckets, state, time)
+    return unless time < best[state]
+
+    best[state] = time
+    (buckets[time] ||= []) << state
+  end
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+def solve(input)
+  Cave.new(input, margin: 1).risk
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def solve2(input)
+  Cave.new(input).fastest
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    depth: 510
+    target: 10,10
+  INPUT
+
+  def test_solve_example
+    assert_equal 114, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 6208, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 45, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 1039, solve2(read_file('input.txt'))
+  end
 end
-
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
-
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')

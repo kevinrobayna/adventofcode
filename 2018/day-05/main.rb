@@ -1,30 +1,44 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
 
-  puts "Congratulations! Got expected result (#{expected})"
+def react(units)
+  stack = []
+  units.each_byte do |b|
+    if stack.last && (stack.last ^ b) == 32
+      stack.pop
+    else
+      stack << b
+    end
+  end
+  stack.size
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+def solve(input)
+  react(input.strip)
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def solve2(input)
+  polymer = input.strip
+  ('a'..'z').map { |c| react(polymer.delete(c + c.upcase)) }.min
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+class AoCTest < Minitest::Test
+  EXAMPLE = "dabAcCaCBAcCcaDA\n"
+
+  def test_solve_example
+    assert_equal 10, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 10_978, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 4, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 4840, solve2(read_file('input.txt'))
+  end
 end
-
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
-
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')

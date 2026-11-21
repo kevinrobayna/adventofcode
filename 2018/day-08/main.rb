@@ -1,30 +1,54 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
 
-  puts "Congratulations! Got expected result (#{expected})"
+Node = Struct.new(:children, :metadata) do
+  def checksum
+    metadata.sum + children.sum(&:checksum)
+  end
+
+  def value
+    return metadata.sum if children.empty?
+
+    metadata.sum { |m| m.positive? && children[m - 1] ? children[m - 1].value : 0 }
+  end
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+def parse_node(nums)
+  child_count = nums.shift
+  meta_count = nums.shift
+  children = Array.new(child_count) { parse_node(nums) }
+  Node.new(children, nums.shift(meta_count))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def tree(input)
+  parse_node(input.split.map(&:to_i))
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def solve(input)
+  tree(input).checksum
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve2(input)
+  tree(input).value
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+class AoCTest < Minitest::Test
+  EXAMPLE = "2 3 0 3 10 11 12 1 1 0 1 99 2 1 1 2\n"
+
+  def test_solve_example
+    assert_equal 138, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 44_893, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 66, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 27_433, solve2(read_file('input.txt'))
+  end
+end

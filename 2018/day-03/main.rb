@@ -1,30 +1,51 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
 
-  puts "Congratulations! Got expected result (#{expected})"
+def claims(input)
+  input.lines.map { |l| l.scan(/\d+/).map(&:to_i) }
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+def fabric(claims)
+  counts = Hash.new(0)
+  claims.each do |_, x, y, w, h|
+    (x...(x + w)).each { |i| (y...(y + h)).each { |j| counts[[i, j]] += 1 } }
+  end
+  counts
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def solve(input)
+  fabric(claims(input)).count { |_, v| v > 1 }
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def solve2(input)
+  cs = claims(input)
+  counts = fabric(cs)
+  cs.find do |_, x, y, w, h|
+    (x...(x + w)).all? { |i| (y...(y + h)).all? { |j| counts[[i, j]] == 1 } }
+  end.first
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    #1 @ 1,3: 4x4
+    #2 @ 3,1: 4x4
+    #3 @ 5,5: 2x2
+  INPUT
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+  def test_solve_example
+    assert_equal 4, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 115_304, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 3, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 275, solve2(read_file('input.txt'))
+  end
+end

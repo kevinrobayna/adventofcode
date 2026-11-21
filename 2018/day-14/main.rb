@@ -1,30 +1,55 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
 
-  puts "Congratulations! Got expected result (#{expected})"
+# Scoreboard as a String of ASCII digits; generates recipes in chunks until the block returns truthy.
+def scoreboard(chunk: 100_000)
+  board = +'37'
+  a = 0
+  b = 1
+  until (result = yield board)
+    chunk.times do
+      sa = board.getbyte(a) - 48
+      sb = board.getbyte(b) - 48
+      board << (sa + sb).to_s
+      size = board.size
+      a = (a + 1 + sa) % size
+      b = (b + 1 + sb) % size
+    end
+  end
+  result
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+def solve(input)
+  n = input.to_i
+  scoreboard(chunk: 1000) { |board| board[n, 10] if board.size >= n + 10 }
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def solve2(input)
+  target = input.strip
+  scoreboard { |board| board.index(target) }
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+class AoCTest < Minitest::Test
+  def test_solve_example
+    assert_equal '5158916779', solve('9')
+    assert_equal '0124515891', solve('5')
+    assert_equal '9251071085', solve('18')
+    assert_equal '5941429882', solve('2018')
+  end
+
+  def test_solve_input
+    assert_equal '2810862211', solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 9, solve2('51589')
+    assert_equal 5, solve2('01245')
+    assert_equal 18, solve2('92510')
+    assert_equal 2018, solve2('59414')
+  end
+
+  def test_solve2_input
+    assert_equal 20_227_889, solve2(read_file('input.txt'))
+  end
 end
-
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
-
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
