@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
-require_relative '../../lib/aoc'
+require 'minitest/autorun'
+
+# Reads a file that lives next to this solution.
+def read_file(filename)
+  File.read(File.join(__dir__, filename))
+end
 
 # Facing: 0 right, 1 down, 2 left, 3 up.
 STEPS = [[0, 1], [1, 0], [0, -1], [-1, 0]].freeze

@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
-require_relative '../../lib/aoc'
+require 'minitest/autorun'
+
+# Reads a file that lives next to this solution.
+def read_file(filename)
+  File.read(File.join(__dir__, filename))
+end
 
 HEADINGS = { 'N' => Complex(0, 1), 'S' => Complex(0, -1), 'E' => Complex(1, 0), 'W' => Complex(-1, 0) }.freeze
 

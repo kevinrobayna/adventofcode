@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
-require_relative '../../lib/aoc'
+require 'minitest/autorun'
+
+# Reads a file that lives next to this solution.
+def read_file(filename)
+  File.read(File.join(__dir__, filename))
+end
 
 # Returns { guard_id => Array(60) of minute sleep counts }
 def sleep_minutes(input)

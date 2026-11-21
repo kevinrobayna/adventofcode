@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
-require_relative '../../lib/aoc'
+require 'minitest/autorun'
+
+# Reads a file that lives next to this solution.
+def read_file(filename)
+  File.read(File.join(__dir__, filename))
+end
 
 # Rows are bitmasks (1 = trap); a tile is a trap iff exactly one of its left/right neighbours is.
 def safe_tiles(first_row, rows)

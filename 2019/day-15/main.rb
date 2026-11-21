@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
-require_relative '../../lib/aoc'
+require 'minitest/autorun'
+
+# Reads a file that lives next to this solution.
+def read_file(filename)
+  File.read(File.join(__dir__, filename))
+end
 require_relative '../intcode'
 
 MOVES = { 1 => [0, -1], 2 => [0, 1], 3 => [-1, 0], 4 => [1, 0] }.freeze

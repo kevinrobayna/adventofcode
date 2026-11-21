@@ -3,7 +3,7 @@
 require 'minitest/autorun'
 require 'tmpdir'
 require 'fileutils'
-require_relative '../lib/runner'
+load File.expand_path('../Rakefile', __dir__)
 
 class RunnerTest < Minitest::Test
   def setup

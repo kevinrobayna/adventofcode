@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
-require_relative '../../lib/aoc'
+require 'minitest/autorun'
+
+# Reads a file that lives next to this solution.
+def read_file(filename)
+  File.read(File.join(__dir__, filename))
+end
 
 # The 24 proper rotations of 3D space as lambdas on [x, y, z].
 ROTATIONS = [0, 1, 2].permutation.flat_map do |perm|

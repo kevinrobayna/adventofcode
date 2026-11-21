@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
-require_relative '../../lib/aoc'
+require 'minitest/autorun'
+
+# Reads a file that lives next to this solution.
+def read_file(filename)
+  File.read(File.join(__dir__, filename))
+end
 
 # Smallest quantum entanglement of a minimum-size first group summing to total / groups.
 # Assumes (as holds for real inputs) the remaining packages can be split evenly.

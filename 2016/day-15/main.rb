@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
-require_relative '../../lib/aoc'
+require 'minitest/autorun'
+
+# Reads a file that lives next to this solution.
+def read_file(filename)
+  File.read(File.join(__dir__, filename))
+end
 
 def parse(input)
   input.scan(/Disc #(\d+) has (\d+) positions; at time=0, it is at position (\d+)/).map { |d| d.map(&:to_i) }

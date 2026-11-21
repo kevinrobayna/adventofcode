@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
-require_relative '../../lib/aoc'
+require 'minitest/autorun'
+
+# Reads a file that lives next to this solution.
+def read_file(filename)
+  File.read(File.join(__dir__, filename))
+end
 require 'digest'
 
 DIRS = [['U', 0, -1], ['D', 0, 1], ['L', -1, 0], ['R', 1, 0]].freeze

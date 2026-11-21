@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
-require_relative '../../lib/aoc'
+require 'minitest/autorun'
+
+# Reads a file that lives next to this solution.
+def read_file(filename)
+  File.read(File.join(__dir__, filename))
+end
 
 # BFS from a point to every reachable key: {key => [distance, doors_mask]} (other keys en route count as doors).
 def reach(rows, start)

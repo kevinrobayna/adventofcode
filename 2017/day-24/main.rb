@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
-require_relative '../../lib/aoc'
+require 'minitest/autorun'
+
+# Reads a file that lives next to this solution.
+def read_file(filename)
+  File.read(File.join(__dir__, filename))
+end
 
 # Returns [max strength, [max length, strength of the strongest longest]] of bridges continuing from `port`.
 def best_bridges(by_port, port, used)

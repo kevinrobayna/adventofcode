@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
-require_relative '../../lib/aoc'
+require 'minitest/autorun'
+
+# Reads a file that lives next to this solution.
+def read_file(filename)
+  File.read(File.join(__dir__, filename))
+end
 
 def open?(x, y, fav)
   x >= 0 && y >= 0 && ((x * x) + (3 * x) + (2 * x * y) + y + (y * y) + fav).digits(2).sum.even?

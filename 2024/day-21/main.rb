@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
-require_relative '../../lib/aoc'
+require 'minitest/autorun'
+
+# Reads a file that lives next to this solution.
+def read_file(filename)
+  File.read(File.join(__dir__, filename))
+end
 
 NUMERIC = { '7' => [0, 0], '8' => [0, 1], '9' => [0, 2], '4' => [1, 0], '5' => [1, 1], '6' => [1, 2],
             '1' => [2, 0], '2' => [2, 1], '3' => [2, 2], '0' => [3, 1], 'A' => [3, 2] }.freeze

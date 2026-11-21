@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
-require_relative '../../lib/aoc'
+require 'minitest/autorun'
+
+# Reads a file that lives next to this solution.
+def read_file(filename)
+  File.read(File.join(__dir__, filename))
+end
 
 # Axial hex coordinates.
 HEX = { 'e' => [1, 0], 'w' => [-1, 0], 'ne' => [1, -1], 'nw' => [0, -1], 'se' => [0, 1], 'sw' => [-1, 1] }.freeze

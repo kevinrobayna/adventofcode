@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
-require_relative '../../lib/aoc'
+require 'minitest/autorun'
+
+# Reads a file that lives next to this solution.
+def read_file(filename)
+  File.read(File.join(__dir__, filename))
+end
 
 # Scoreboard as a String of ASCII digits; generates recipes in chunks until the block returns truthy.
 def scoreboard(chunk: 100_000)
