@@ -1,30 +1,69 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
 
-  puts "Congratulations! Got expected result (#{expected})"
+HEADINGS = { 'N' => Complex(0, 1), 'S' => Complex(0, -1), 'E' => Complex(1, 0), 'W' => Complex(-1, 0) }.freeze
+
+def instructions(input)
+  input.split.map { |l| [l[0], l[1..].to_i] }
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+def turn(action, value)
+  Complex(0, action == 'L' ? 1 : -1)**(value / 90)
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def manhattan(z)
+  z.real.abs + z.imaginary.abs
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def solve(input)
+  pos = Complex(0, 0)
+  dir = Complex(1, 0)
+  instructions(input).each do |action, value|
+    case action
+    when 'L', 'R' then dir *= turn(action, value)
+    when 'F' then pos += dir * value
+    else pos += HEADINGS[action] * value
+    end
+  end
+  manhattan(pos)
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve2(input)
+  pos = Complex(0, 0)
+  waypoint = Complex(10, 1)
+  instructions(input).each do |action, value|
+    case action
+    when 'L', 'R' then waypoint *= turn(action, value)
+    when 'F' then pos += waypoint * value
+    else waypoint += HEADINGS[action] * value
+    end
+  end
+  manhattan(pos)
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    F10
+    N3
+    F7
+    R90
+    F11
+  INPUT
+
+  def test_solve_example
+    assert_equal 25, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 590, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 286, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 42_013, solve2(read_file('input.txt'))
+  end
+end

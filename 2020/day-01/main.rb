@@ -1,30 +1,42 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
 
-  puts "Congratulations! Got expected result (#{expected})"
+def find_product(input, size)
+  input.split.map(&:to_i).combination(size).find { |c| c.sum == 2020 }.reduce(:*)
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+def solve(input)
+  find_product(input, 2)
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def solve2(input)
+  find_product(input, 3)
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    1721
+    979
+    366
+    299
+    675
+    1456
+  INPUT
+
+  def test_solve_example
+    assert_equal 514_579, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 713_184, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 241_861_950, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 261_244_452, solve2(read_file('input.txt'))
+  end
 end
-
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
-
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')

@@ -1,30 +1,50 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
 
-  puts "Congratulations! Got expected result (#{expected})"
+def solve(input)
+  earliest, buses = input.lines
+  earliest = earliest.to_i
+  bus = buses.split(',').reject { |b| b == 'x' }.map(&:to_i).min_by { |b| -earliest % b }
+  bus * (-earliest % bus)
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+# Sieve over the (pairwise coprime) bus ids: t + offset ≡ 0 (mod bus).
+def solve2(input)
+  buses = input.lines.last.strip.split(',').each_with_index.reject { |b, _| b == 'x' }.map { |b, i| [b.to_i, i] }
+  t = 0
+  step = 1
+  buses.each do |bus, offset|
+    t += step until ((t + offset) % bus).zero?
+    step = step.lcm(bus)
+  end
+  t
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    939
+    7,13,x,x,59,x,31,19
+  INPUT
+
+  def test_solve_example
+    assert_equal 295, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 3882, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 1_068_781, solve2(EXAMPLE)
+    assert_equal 3417, solve2("0\n17,x,13,19\n")
+    assert_equal 754_018, solve2("0\n67,7,59,61\n")
+    assert_equal 779_210, solve2("0\n67,x,7,59,61\n")
+    assert_equal 1_261_476, solve2("0\n67,7,x,59,61\n")
+    assert_equal 1_202_161_486, solve2("0\n1789,37,47,1889\n")
+  end
+
+  def test_solve2_input
+    assert_equal 867_295_486_378_319, solve2(read_file('input.txt'))
+  end
 end
-
-def solve2(filename)
-  read_file(filename)
-  0
-end
-
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
-
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
