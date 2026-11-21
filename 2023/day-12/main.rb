@@ -1,69 +1,67 @@
 # frozen_string_literal: true
 
-require 'pry'
+require_relative '../../lib/aoc'
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
-
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
-end
-
-def solve(filename, n_folds = 1)
-  read_file(filename).each_line.reduce(0) do |acc, line|
-    springs, rules = line.strip.split(' ')
-
-    # Expand the number of folds
-    # Replace multiple instances of . with a single . since .. == .
-    # Append a . to the end of the input to not need to worry about '# 1' being invalid
-    springs = "#{([springs] * n_folds).join('?')}.".squeeze('.')
-    rules = rules.split(',').map(&:to_i) * n_folds
-
-    acc + count(springs, rules, 0, {})
+def solve(input, folds: 1)
+  input.each_line.sum do |line|
+    springs, rules = line.split
+    # Unfold, then append a '.' so a group running into the end of the row is closed naturally.
+    springs = "#{([springs] * folds).join('?')}."
+    rules = rules.split(',').map(&:to_i) * folds
+    count(springs, rules)
   end
 end
 
-def count(springs, rules, group_count = 0, cache = {})
-  key = [springs, rules, group_count]
-
-  return cache[key] if cache[key]
-
-  return cache[key] = 0 if rules.any? { _1 - group_count > springs.length }
-
-  if rules.empty?
-    return cache[key] = 1 unless springs.include?('#')
-
-    return cache[key] = 0
-  end
-
-  head, *left = springs.chars
-  case [head, group_count]
-  in ['?', _]
-    # Explore solution for either value of ?
-    cache[key] =
-      count("##{left.join}", rules, group_count, cache) + count(".#{left.join}", rules, group_count, cache)
-  in ['#', _]
-    cache[key] = count(left.join, rules, group_count + 1, cache)
-  in ['.', ^(rules.first)]
-    # We finished completing a group
-    cache[key] = count(left.join, rules[1..], 0, cache)
-  in ['.', (1..)]
-    # we found a . but the group count does not match so this combination is invalid
-    cache[key] = 0
-  in ['.', 0]
-    # Move forward
-    cache[key] = count(left.join, rules, 0, cache)
-  end
+def solve2(input, folds: 5)
+  solve(input, folds: folds)
 end
 
-compare_solutions(21, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+# Arrangements of springs given the group sizes, memoised on [position, rule index, current '#' run].
+def count(springs, rules)
+  cache = {}
+  walk = lambda do |pos, rule, group|
+    return rule == rules.length && group.zero? ? 1 : 0 if pos == springs.length
 
-compare_solutions(525_152, solve('test.txt', 5))
-puts 'Part2', solve('input.txt', 5)
+    cache[[pos, rule, group]] ||= begin
+      char = springs[pos]
+      total = 0
+      total += walk.call(pos + 1, rule, group + 1) if char != '.' && rule < rules.length && group < rules[rule] # place '#'
+      if char != '#'
+        if group.zero?
+          total += walk.call(pos + 1, rule, 0) # place '.'
+        elsif group == rules[rule]
+          total += walk.call(pos + 1, rule + 1, 0) # close the group
+        end
+      end
+      total
+    end
+  end
+  walk.call(0, 0, 0)
+end
+
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    ???.### 1,1,3
+    .??..??...?##. 1,1,3
+    ?#?#?#?#?#?#?#? 1,3,1,6
+    ????.#...#... 4,1,1
+    ????.######..#####. 1,6,5
+    ?###???????? 3,2,1
+  INPUT
+
+  def test_solve_example
+    assert_equal 21, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 7460, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 525_152, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 6_720_660_274_964, solve2(read_file('input.txt'))
+  end
+end

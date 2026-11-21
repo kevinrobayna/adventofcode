@@ -1,58 +1,52 @@
 # frozen_string_literal: true
 
-require 'pry'
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
-end
-
-def parse_problem(filename)
-  read_file(filename).each_line.map do |line|
+# Number of winning numbers per card.
+def parse(input)
+  input.each_line.map do |line|
     _, numbers = line.split(':')
     left, right = numbers.split('|')
-    left.strip.split(' ').sort & right.strip.split(' ').sort
+    (left.split & right.split).length
   end
 end
 
-def solve(filename)
-  parse_problem(filename).reduce(0) do |acc, numbers|
-    acc + if numbers.empty?
-            0
-          elsif numbers.length == 1
-            1
-          else
-            result = 1
-            (numbers.length - 1).times { result *= 2 }
-
-            result
-          end
-  end
+def solve(input)
+  parse(input).sum { |matches| matches.zero? ? 0 : 2**(matches - 1) }
 end
 
-def solve2(filename)
-  scratchcards = []
-  parse_problem(filename).each_with_index do |numbers, inx|
-    current = inx + 1
-    scratchcards << current
-    state = scratchcards.tally
-    (1..numbers.length).each do |x|
-      state[current].times { scratchcards << current + x }
-    end
+def solve2(input)
+  matches = parse(input)
+  copies = Array.new(matches.length, 1)
+  matches.each_with_index do |count, inx|
+    (1..count).each { |x| copies[inx + x] += copies[inx] if inx + x < copies.length }
   end
-
-  scratchcards.tally.values.sum
+  copies.sum
 end
 
-compare_solutions(13, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53
+    Card 2: 13 32 20 16 61 | 61 30 68 82 17 32 24 19
+    Card 3:  1 21 53 59 44 | 69 82 63 72 16 21 14  1
+    Card 4: 41 92 73 84 69 | 59 84 76 51 58  5 54 83
+    Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36
+    Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11
+  INPUT
 
-compare_solutions(30, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+  def test_solve_example
+    assert_equal 13, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 25_231, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 30, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 9_721_255, solve2(read_file('input.txt'))
+  end
+end

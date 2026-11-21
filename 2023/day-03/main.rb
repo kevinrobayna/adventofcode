@@ -1,26 +1,6 @@
 # frozen_string_literal: true
 
-require 'pry'
-require 'colorize'
-
-class Object
-  def number?
-    to_f.to_s == to_s || to_i.to_s == to_s
-  end
-end
-
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
-
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
-end
+require_relative '../../lib/aoc'
 
 MOVEMENTS = [
   [-1, -1], [-1, 1],
@@ -29,128 +9,88 @@ MOVEMENTS = [
   [-1, 0], [1, 0]
 ].freeze
 
-def solve(filename)
-  board = read_file(filename).lines.map { _1.strip.chars }
-  numbers = possible_parts(board)
-
-  valid_parts = numbers.select do |_number, positions|
-    positions.any? do |inx_x, inx_y|
-      MOVEMENTS.any? do |mov_x, mov_y|
-        next_x = mov_x + inx_x
-        next_y = mov_y + inx_y
-
-        next if next_x.negative?
-        next if next_y.negative?
-        next if next_x >= board.length
-        next if next_y >= board.first.length
-
-        next_v = board[next_x][next_y]
-        next if next_v == '.' || next_v.number?
-
-        true
-      end
-    end
-  end
-
-  valid_parts.map { |number, _| number }.sum
-end
-
-def solve2(filename)
-  board = read_file(filename).lines.map { _1.strip.chars }
-  numbers = possible_parts(board)
-
-  potential_numbers = numbers.select do |_number, positions|
-    positions.any? do |inx_x, inx_y|
-      MOVEMENTS.any? do |mov_x, mov_y|
-        next_x = mov_x + inx_x
-        next_y = mov_y + inx_y
-
-        next if next_x.negative?
-        next if next_y.negative?
-        next if next_x >= board.length
-        next if next_y >= board.first.length
-
-        next_v = board[next_x][next_y]
-        next unless next_v == '*'
-
-        true
-      end
-    end
-  end
-
-  valid_parts = []
-  products = []
-  board.each_with_index do |row, inx_x|
-    row.each_with_index do |v, inx_y|
-      next unless v == '*'
-
-      neighbours = []
-      MOVEMENTS.each do |mov_x, mov_y|
-        next_x = mov_x + inx_x
-        next_y = mov_y + inx_y
-
-        selected = potential_numbers.select do |number, positions|
-          positions.include?([next_x, next_y]) && !neighbours.include?([number, positions])
-        end
-        next if selected.empty?
-        next if selected.length > 1
-
-        neighbours << selected.first
-      end
-
-      next if neighbours.length == 1
-
-      valid_parts << neighbours.first
-      valid_parts << neighbours.last
-      products << neighbours.first.first * neighbours.last.first
-    end
-  end
-
-  debug_board(board, valid_parts)
-
-  products.sum
-end
-
+# Returns [[number, [[x, y], ...]], ...] for every number on the board.
 def possible_parts(board)
   numbers = []
-  board.each_with_index do |row, inx_x|
-    number = []
-    positions = []
-    row.each_with_index do |v, inx_y|
-      if v.number?
-        number << v
-        positions << [inx_x, inx_y]
-      else
-        numbers << [number.join.to_i, positions] unless number.empty?
-
-        number = []
-        positions = []
-      end
+  board.each_with_index do |row, x|
+    row.join.scan(/\d+/) do
+      start = Regexp.last_match.begin(0)
+      numbers << [Regexp.last_match(0).to_i, (start...Regexp.last_match.end(0)).map { |y| [x, y] }]
     end
-    numbers << [number.join.to_i, positions] unless number.empty?
   end
   numbers
 end
 
-def debug_board(board, valid_parts)
-  board.each_with_index do |row, inx_x|
-    row.each_with_index do |v, inx_y|
-      board[inx_x][inx_y] = v.green if v != '.' && v != '*' && !v.number?
-      board[inx_x][inx_y] = v.red if v == '*'
+def neighbours(board, positions)
+  positions.flat_map do |x, y|
+    MOVEMENTS.filter_map do |dx, dy|
+      nx = x + dx
+      ny = y + dy
+      next if nx.negative? || ny.negative? || nx >= board.length || ny >= board.first.length
+
+      [nx, ny]
     end
-  end
-  valid_parts.each_value do |positions|
-    positions.each do |inx_x, inx_y|
-      board[inx_x][inx_y] = board[inx_x][inx_y].yellow
-    end
-  end
-  puts board.map(&:join).join("\n")
+  end.uniq
 end
 
-compare_solutions(4361, solve('test.txt'))
-compare_solutions(4361, solve('test2.txt'))
-compare_solutions(557_705, solve('input.txt'))
-puts 'Part1', solve('input.txt')
+def solve(input)
+  board = input.lines.map { it.strip.chars }
+  possible_parts(board).sum do |number, positions|
+    symbol = neighbours(board, positions).any? { |x, y| board[x][y].match?(/[^.\d]/) }
+    symbol ? number : 0
+  end
+end
 
-compare_solutions(467_835, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+def solve2(input)
+  board = input.lines.map { it.strip.chars }
+  gears = Hash.new { |h, k| h[k] = [] }
+  possible_parts(board).each do |number, positions|
+    neighbours(board, positions).each { |x, y| gears[[x, y]] << number if board[x][y] == '*' }
+  end
+  gears.values.select { it.length == 2 }.sum { |a, b| a * b }
+end
+
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    467..114..
+    ...*......
+    ..35..633.
+    ......#...
+    617*......
+    .....+.58.
+    ..592.....
+    ......755.
+    ...$.*....
+    .664.598..
+  INPUT
+
+  EXAMPLE2 = <<~INPUT
+    467..114..
+    ...*......
+    ..35...633
+    .......#..
+    617*......
+    .....+.58.
+    ..592.....
+    ......755.
+    ...$.*....
+    .664.598..
+  INPUT
+
+  def test_solve_example
+    assert_equal 4361, solve(EXAMPLE)
+    assert_equal 4361, solve(EXAMPLE2)
+  end
+
+  def test_solve_input
+    assert_equal 557_705, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 467_835, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 84_266_818, solve2(read_file('input.txt'))
+  end
+end
