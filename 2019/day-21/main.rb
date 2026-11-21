@@ -1,30 +1,66 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
+require_relative '../intcode'
 
-  puts "Congratulations! Got expected result (#{expected})"
+# Jump when a hole is within the next three tiles and the landing tile D is ground.
+WALK = ['NOT A J', 'NOT B T', 'OR T J', 'NOT C T', 'OR T J', 'AND D J', 'WALK'].freeze
+# Same, but only when after landing we can either step (E) or jump again (H).
+RUN = [*WALK[0..-2], 'NOT E T', 'NOT T T', 'OR H T', 'AND T J', 'RUN'].freeze
+
+def hull_damage(input, script)
+  out = Intcode.new(input).run_ascii(*script)
+  raise "droid fell:\n#{out.pack('c*')}" if out.last < 128
+
+  out.last
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+def solve(input)
+  hull_damage(input, WALK)
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def solve2(input)
+  hull_damage(input, RUN)
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+# Simulates a springscript on a hull (true = ground) to check the jump logic offline.
+def survives?(script, hull, reach)
+  pos = 0
+  while pos < hull.size - 1
+    sensors = ('A'..'I').first(reach).to_h { |s| [s, hull.fetch(pos + s.ord - 64, true)] }
+    reg = { 'T' => false, 'J' => false }
+    script[0..-2].each do |line|
+      op, x, y = line.split
+      v = sensors.fetch(x) { reg[x] }
+      reg[y] = { 'AND' => v && reg[y], 'OR' => v || reg[y], 'NOT' => !v }[op]
+    end
+    pos += reg['J'] ? 4 : 1
+    return false unless hull.fetch(pos, true)
+  end
+  true
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+class AoCTest < Minitest::Test
+  def hull(text) = text.chars.map { it == '#' }
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+  def test_solve_example
+    assert survives?(WALK, hull('#####.###########'), 4)
+    assert survives?(WALK, hull('#####...#########'), 4)
+    assert survives?(WALK, hull('#####..#.########'), 4)
+  end
+
+  def test_solve_input
+    assert_equal 19_357_335, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    refute survives?(WALK, hull('#####.#.##..#.###'), 4)
+    assert survives?(RUN, hull('#####.#.##..#.###'), 9)
+    assert survives?(RUN, hull('#####.##.##.#.###'), 9)
+    assert survives?(RUN, hull('#####...#...#.####'), 9)
+  end
+
+  def test_solve2_input
+    assert_equal 1_140_147_758, solve2(read_file('input.txt'))
+  end
+end

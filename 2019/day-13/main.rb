@@ -1,30 +1,44 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
+require_relative '../intcode'
 
-  puts "Congratulations! Got expected result (#{expected})"
+def tiles(outputs)
+  outputs.each_slice(3).to_a
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+def solve(input)
+  tiles(Intcode.new(input).run).count { it[2] == 2 }
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+# Plays the game by keeping the paddle under the ball; returns the final score.
+def solve2(input)
+  vm = Intcode.new(input)
+  vm.mem[0] = 2
+  score = ball = paddle = 0
+  joystick = []
+  until vm.halted?
+    tiles(vm.run(joystick)).each do |x, y, v|
+      if x == -1 && y.zero? then score = v
+      elsif v == 3 then paddle = x
+      elsif v == 4 then ball = x
+      end
+    end
+    joystick = [ball <=> paddle]
+  end
+  score
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+class AoCTest < Minitest::Test
+  def test_solve_example
+    assert_equal [[1, 2, 3], [6, 5, 4]], tiles([1, 2, 3, 6, 5, 4])
+  end
+
+  def test_solve_input
+    assert_equal 363, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_input
+    assert_equal 17_159, solve2(read_file('input.txt'))
+  end
 end
-
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
-
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')

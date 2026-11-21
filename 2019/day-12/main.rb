@@ -1,30 +1,71 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
 
-  puts "Congratulations! Got expected result (#{expected})"
+def moons(input)
+  input.lines.map { it.scan(/-?\d+/).map(&:to_i) }
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+# Simulates one axis: positions and velocities arrays, mutated in place.
+def step_axis(pos, vel)
+  pos.each_index do |i|
+    pos.each { |p| vel[i] += p <=> pos[i] }
+  end
+  vel.each_with_index { |v, i| pos[i] += v }
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def solve(input, steps: 1000)
+  axes = moons(input).transpose.map { |pos| [pos, Array.new(pos.size, 0)] }
+  steps.times { axes.each { |pos, vel| step_axis(pos, vel) } }
+  pos = axes.map(&:first).transpose
+  vel = axes.map(&:last).transpose
+  pos.zip(vel).sum { |p, v| p.sum(&:abs) * v.sum(&:abs) }
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def axis_period(start)
+  pos = start.dup
+  vel = Array.new(pos.size, 0)
+  steps = 0
+  loop do
+    step_axis(pos, vel)
+    steps += 1
+    return steps if pos == start && vel.all?(&:zero?)
+  end
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve2(input)
+  moons(input).transpose.map { axis_period(it) }.reduce(:lcm)
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    <x=-1, y=0, z=2>
+    <x=2, y=-10, z=-7>
+    <x=4, y=-8, z=8>
+    <x=3, y=5, z=-1>
+  INPUT
+  EXAMPLE2 = <<~INPUT
+    <x=-8, y=-10, z=0>
+    <x=5, y=5, z=10>
+    <x=2, y=-7, z=3>
+    <x=9, y=-8, z=-3>
+  INPUT
+
+  def test_solve_example
+    assert_equal 179, solve(EXAMPLE, steps: 10)
+    assert_equal 1940, solve(EXAMPLE2, steps: 100)
+  end
+
+  def test_solve_input
+    assert_equal 11_384, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 2772, solve2(EXAMPLE)
+    assert_equal 4_686_774_924, solve2(EXAMPLE2)
+  end
+
+  def test_solve2_input
+    assert_equal 452_582_583_272_768, solve2(read_file('input.txt'))
+  end
+end
