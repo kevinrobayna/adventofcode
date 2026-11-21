@@ -88,4 +88,12 @@ class AoCTest < Minitest::Test
     u_shape = "0,0\n10,0\n10,10\n6,10\n6,2\n4,2\n4,10\n0,10\n"
     assert_equal 55, solve2(u_shape)
   end
+
+  def test_solve_input
+    assert_equal 4_777_967_538, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_input
+    assert_equal 1_439_894_345, solve2(read_file('input.txt'))
+  end
 end

@@ -87,4 +87,12 @@ class AoCTest < Minitest::Test
   def test_solve2_example
     assert_equal 'co,de,ka,ta', solve2(EXAMPLE)
   end
+
+  def test_solve_input
+    assert_equal 1411, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_input
+    assert_equal 'aq,bn,ch,dt,gu,ow,pk,qy,tv,us,yx,zg,zu', solve2(read_file('input.txt'))
+  end
 end

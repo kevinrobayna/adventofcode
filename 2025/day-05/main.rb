@@ -50,4 +50,12 @@ class AoCTest < Minitest::Test
   def test_solve2_nested_and_adjacent
     assert_equal 10, solve2("1-10\n2-3\n4-5\n\n1\n")
   end
+
+  def test_solve_input
+    assert_equal 828, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_input
+    assert_equal 352_681_648_086_146, solve2(read_file('input.txt'))
+  end
 end

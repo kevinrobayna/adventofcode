@@ -72,4 +72,12 @@ class AoCTest < Minitest::Test
   def test_all_paths_example2
     assert_equal 8, Devices.new(EXAMPLE2).paths('svr', 'out')
   end
+
+  def test_solve_input
+    assert_equal 511, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_input
+    assert_equal 458_618_114_529_380, solve2(read_file('input.txt'))
+  end
 end

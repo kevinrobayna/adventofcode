@@ -83,4 +83,12 @@ class AoCTest < Minitest::Test
     a = solve2("Register A: 1\nRegister B: 0\nRegister C: 0\n\nProgram: #{program}\n")
     assert_equal program, solve("Register A: #{a}\nRegister B: 0\nRegister C: 0\n\nProgram: #{program}\n")
   end
+
+  def test_solve_input
+    assert_equal '6,5,4,7,1,6,0,3,1', solve(read_file('input.txt'))
+  end
+
+  def test_solve2_input
+    assert_equal 106_086_382_266_778, solve2(read_file('input.txt'))
+  end
 end

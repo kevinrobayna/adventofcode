@@ -56,4 +56,12 @@ class AoCTest < Minitest::Test
   def test_solve2_example
     assert_equal 23, solve2("1\n2\n3\n2024\n")
   end
+
+  def test_solve_input
+    assert_equal 13_461_553_007, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_input
+    assert_equal 1499, solve2(read_file('input.txt'))
+  end
 end

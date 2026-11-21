@@ -72,4 +72,12 @@ class AoCTest < Minitest::Test
     end
     assert_equal target, solve2(lines.join("\n"))
   end
+
+  def test_solve_input
+    assert_equal 225_552_000, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_input
+    assert_equal 7371, solve2(read_file('input.txt'))
+  end
 end

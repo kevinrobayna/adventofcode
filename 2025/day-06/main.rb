@@ -47,4 +47,12 @@ class AoCTest < Minitest::Test
   def test_trailing_spaces_trimmed
     assert_equal 3_263_827, solve2(EXAMPLE.lines.map(&:rstrip).join("\n"))
   end
+
+  def test_solve_input
+    assert_equal 4_364_617_236_318, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_input
+    assert_equal 9_077_004_354_241, solve2(read_file('input.txt'))
+  end
 end

@@ -110,4 +110,12 @@ class AoCTest < Minitest::Test
     INPUT
     assert_equal 1206, solve2(EXAMPLE)
   end
+
+  def test_solve_input
+    assert_equal 1_434_856, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_input
+    assert_equal 891_106, solve2(read_file('input.txt'))
+  end
 end

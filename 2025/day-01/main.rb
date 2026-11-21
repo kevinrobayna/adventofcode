@@ -58,4 +58,12 @@ class AoCTest < Minitest::Test
     assert_equal 2, solve2("L50\nL100\n")
     assert_equal 1, solve2("L50\nR99\n")
   end
+
+  def test_solve_input
+    assert_equal 1055, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_input
+    assert_equal 6386, solve2(read_file('input.txt'))
+  end
 end

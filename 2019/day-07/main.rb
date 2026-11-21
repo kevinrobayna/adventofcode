@@ -44,4 +44,12 @@ class AoCTest < Minitest::Test
     assert_equal 18_216, solve2(FEEDBACK2)
     assert_equal 18_216, feedback_thrust(Intcode.parse(FEEDBACK2), [9, 7, 8, 5, 6])
   end
+
+  def test_solve_input
+    assert_equal 272_368, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_input
+    assert_equal 19_741_286, solve2(read_file('input.txt'))
+  end
 end

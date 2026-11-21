@@ -154,4 +154,8 @@ class AoCTest < Minitest::Test
     assert_equal 4, orientations([[0, 0], [0, 1], [0, 2], [1, 0], [2, 0], [2, 1], [2, 2]]).size
     assert_equal 2, orientations([[0, 0], [0, 1], [0, 2], [1, 1], [2, 0], [2, 1], [2, 2]]).size
   end
+
+  def test_solve_input
+    assert_equal 593, solve(read_file('input.txt'))
+  end
 end

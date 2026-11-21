@@ -166,4 +166,12 @@ class AoCTest < Minitest::Test
     [%w[z07 t07], %w[s15 a15], %w[z23 c23], %w[z31 a31]].each { |a, b| circuit = swap_outputs(circuit, a, b) }
     assert_equal 'a15,a31,c23,s15,t07,z07,z23,z31', solve2(circuit)
   end
+
+  def test_solve_input
+    assert_equal 69_201_640_933_606, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_input
+    assert_equal 'dhq,hbs,jcp,kfp,pdg,z18,z22,z27', solve2(read_file('input.txt'))
+  end
 end

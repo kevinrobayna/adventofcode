@@ -85,4 +85,12 @@ class AoCTest < Minitest::Test
   def test_solve2_per_machine
     assert_equal [10, 12, 11], machines(EXAMPLE).map(&:fewest_joltage_presses)
   end
+
+  def test_solve_input
+    assert_equal 578, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_input
+    assert_equal 20_709, solve2(read_file('input.txt'))
+  end
 end
