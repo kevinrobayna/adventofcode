@@ -1,30 +1,33 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
 
-  puts "Congratulations! Got expected result (#{expected})"
+def captcha(input, offset)
+  digits = input.strip.chars.map(&:to_i)
+  digits.each_with_index.sum { |d, i| d == digits[(i + offset) % digits.size] ? d : 0 }
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+def solve(input)
+  captcha(input, 1)
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def solve2(input)
+  captcha(input, input.strip.size / 2)
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+class AoCTest < Minitest::Test
+  def test_solve_example
+    assert_equal 3, solve('1122')
+    assert_equal 4, solve('1111')
+    assert_equal 0, solve('1234')
+    assert_equal 9, solve('91212129')
+  end
+
+  def test_solve2_example
+    assert_equal 6, solve2('1212')
+    assert_equal 0, solve2('1221')
+    assert_equal 4, solve2('123425')
+    assert_equal 12, solve2('123123')
+    assert_equal 4, solve2('12131415')
+  end
 end
-
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
-
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')

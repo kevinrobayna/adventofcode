@@ -1,30 +1,45 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
 
-  puts "Congratulations! Got expected result (#{expected})"
+# Returns [cycles until a repeat is seen, length of the loop].
+def reallocate(input)
+  banks = input.split.map(&:to_i)
+  seen = {}
+  until seen.key?(banks)
+    seen[banks.dup] = seen.size
+    i = banks.index(banks.max)
+    blocks = banks[i]
+    banks[i] = 0
+    blocks.times { |k| banks[(i + 1 + k) % banks.size] += 1 }
+  end
+  [seen.size, seen.size - seen[banks]]
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+def solve(input)
+  reallocate(input)[0]
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def solve2(input)
+  reallocate(input)[1]
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+class AoCTest < Minitest::Test
+  EXAMPLE = "0 2 7 0\n"
+
+  def test_solve_example
+    assert_equal 5, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 6_681, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 4, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 2_392, solve2(read_file('input.txt'))
+  end
 end
-
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
-
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')

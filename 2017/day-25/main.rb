@@ -1,30 +1,63 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
 
-  puts "Congratulations! Got expected result (#{expected})"
+RubyVM::YJIT.enable if defined?(RubyVM::YJIT)
+
+# Parses the blueprint into [start state, steps, {state => [[write, move, next] for 0, for 1]}].
+def parse_blueprint(input)
+  start = input[/Begin in state (\w)/, 1]
+  steps = input[/after (\d+) steps/, 1].to_i
+  rules = input.scan(/In state (\w):(.*?)(?=In state|\z)/m).to_h do |state, body|
+    actions = body.scan(/value (\d)\.\s+- Move one slot to the (\w+)\.\s+- Continue with state (\w)/)
+    [state, actions.map { |w, dir, nxt| [w.to_i, dir == 'right' ? 1 : -1, nxt] }]
+  end
+  [start, steps, rules]
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+def solve(input)
+  state, steps, rules = parse_blueprint(input)
+  tape = Hash.new(0)
+  pos = 0
+  steps.times do
+    write, move, state = rules[state][tape[pos]]
+    tape[pos] = write
+    pos += move
+  end
+  tape.values.sum
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    Begin in state A.
+    Perform a diagnostic checksum after 6 steps.
+
+    In state A:
+      If the current value is 0:
+        - Write the value 1.
+        - Move one slot to the right.
+        - Continue with state B.
+      If the current value is 1:
+        - Write the value 0.
+        - Move one slot to the left.
+        - Continue with state B.
+
+    In state B:
+      If the current value is 0:
+        - Write the value 1.
+        - Move one slot to the left.
+        - Continue with state A.
+      If the current value is 1:
+        - Write the value 1.
+        - Move one slot to the right.
+        - Continue with state A.
+  INPUT
+
+  def test_solve_example
+    assert_equal 3, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 2_794, solve(read_file('input.txt'))
+  end
 end
-
-def solve2(filename)
-  read_file(filename)
-  0
-end
-
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
-
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')

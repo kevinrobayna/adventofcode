@@ -1,30 +1,52 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
+require_relative '../knot_hash'
 
-  puts "Congratulations! Got expected result (#{expected})"
+def disk_grid(key)
+  (0...128).map do |row|
+    KnotHash.bytes("#{key.strip}-#{row}").map { |b| format('%08b', b) }.join
+  end
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+def solve(input)
+  disk_grid(input).sum { |row| row.count('1') }
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def solve2(input)
+  used = Set.new
+  disk_grid(input).each_with_index do |row, y|
+    row.each_char.with_index { |c, x| used << [x, y] if c == '1' }
+  end
+  regions = 0
+  until used.empty?
+    regions += 1
+    stack = [used.first]
+    used.delete(stack.first)
+    until stack.empty?
+      x, y = stack.pop
+      [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]].each { |n| stack << n if used.delete?(n) }
+    end
+  end
+  regions
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+class AoCTest < Minitest::Test
+  EXAMPLE = 'flqrgnkx'
+
+  def test_solve_example
+    assert_equal 8108, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 8_148, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 1242, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 1_180, solve2(read_file('input.txt'))
+  end
 end
-
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
-
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
