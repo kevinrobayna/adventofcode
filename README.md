@@ -19,7 +19,7 @@ download the problem in the folder 2021
 ## Running
 
 Each day's `main.rb` is a self-contained Minitest file: example tests from the puzzle plus a test that locks in the
-answer for my input. New days start from [`templates/main.rb`](templates/main.rb).
+answer for my input.
 
 ```sh
 bundle install
