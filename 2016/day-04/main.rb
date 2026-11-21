@@ -1,30 +1,51 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
 
-  puts "Congratulations! Got expected result (#{expected})"
+Room = Struct.new(:name, :sector, :checksum) do
+  def real?
+    counts = name.delete('-').chars.tally
+    counts.sort_by { |ch, n| [-n, ch] }.first(5).map(&:first).join == checksum
+  end
+
+  def decrypt
+    name.chars.map { |ch| ch == '-' ? ' ' : (((ch.ord - 97 + sector) % 26) + 97).chr }.join
+  end
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+def parse(input)
+  input.scan(/^([a-z-]+)-(\d+)\[([a-z]+)\]/).map { |n, s, c| Room.new(n, s.to_i, c) }
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def solve(input)
+  parse(input).select(&:real?).sum(&:sector)
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def solve2(input, target: 'northpole object storage')
+  parse(input).select(&:real?).find { |r| r.decrypt == target }.sector
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    aaaaa-bbb-z-y-x-123[abxyz]
+    a-b-c-d-e-f-g-h-987[abcde]
+    not-a-real-room-404[oarel]
+    totally-real-room-200[decoy]
+  INPUT
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+  def test_solve_example
+    assert_equal 1514, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 278_221, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 'very encrypted name', Room.new('qzmt-zixmtkozy-ivhz', 343, '').decrypt
+  end
+
+  def test_solve2_input
+    assert_equal 267, solve2(read_file('input.txt'))
+  end
+end

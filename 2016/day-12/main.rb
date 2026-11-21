@@ -1,30 +1,50 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
+require_relative '../assembunny'
 
-  puts "Congratulations! Got expected result (#{expected})"
+def solve(input)
+  Assembunny.new(input).run['a']
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+def solve2(input)
+  Assembunny.new(input, c: 1).run['a']
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    cpy 41 a
+    inc a
+    inc a
+    dec a
+    jnz a 2
+    dec a
+  INPUT
+
+  # Addition loop that the interpreter short-circuits.
+  ADDITION = <<~INPUT
+    cpy 7 b
+    cpy 5 a
+    inc a
+    dec b
+    jnz b -2
+  INPUT
+
+  def test_solve_example
+    assert_equal 42, solve(EXAMPLE)
+    assert_equal 12, solve(ADDITION)
+  end
+
+  def test_solve_input
+    assert_equal 318_007, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 42, solve2(EXAMPLE)
+    assert_equal({ 'a' => 12, 'b' => 0, 'c' => 1, 'd' => 0 }, Assembunny.new(ADDITION, c: 1).run)
+  end
+
+  def test_solve2_input
+    assert_equal 9_227_661, solve2(read_file('input.txt'))
+  end
 end
-
-def solve2(filename)
-  read_file(filename)
-  0
-end
-
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
-
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
