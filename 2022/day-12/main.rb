@@ -1,140 +1,72 @@
 # frozen_string_literal: true
 
-require 'matrix'
+require_relative '../../lib/aoc'
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
-
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
-end
-
-def parse_file(filename)
-  alphabet = ('a'..'z').to_a
-  lines = read_file(filename).split("\n")
-  m = Matrix.zero(lines.length, lines[0].length)
-  start = nil
-  finish = nil
-  lines.each_with_index do |line, inx_i|
-    line.chars.each_with_index do |letter, inx_j|
-      if letter == 'E'
-        m[inx_i, inx_j] = alphabet.index('z')
-        finish = [inx_i, inx_j]
-        next
-      end
-      if letter == 'S'
-        m[inx_i, inx_j] = alphabet.index('a')
-        start = [inx_i, inx_j]
-        next
-      end
-
-      m[inx_i, inx_j] = alphabet.index(letter)
+def parse_input(input)
+  grid = input.split("\n").map(&:chars)
+  start = finish = nil
+  grid.each_with_index do |row, r|
+    row.each_with_index do |c, col|
+      start = [r, col] if c == 'S'
+      finish = [r, col] if c == 'E'
     end
   end
-  [m, start, finish]
+  heights = grid.map { |row| row.map { |c| { 'S' => 'a', 'E' => 'z' }.fetch(c, c).ord - 'a'.ord } }
+  [heights, start, finish]
 end
 
-MOVEMENTS = [
-  [1, 0], # R
-  [-1, 0], # L
-  [0, 1], # U
-  [0, -1] # D
-].freeze
+# BFS backwards from the end: a step from a to b is allowed when height(b) <= height(a) + 1.
+# Returns the distance from every reachable square to the end.
+def distances_to(heights, finish)
+  dist = { finish => 0 }
+  queue = [finish]
+  until queue.empty?
+    r, c = queue.shift
+    [[1, 0], [-1, 0], [0, 1], [0, -1]].each do |dr, dc|
+      nr = r + dr
+      nc = c + dc
+      next if nr.negative? || nc.negative? || nr >= heights.size || nc >= heights[0].size
+      next if dist.key?([nr, nc]) || heights[r][c] > heights[nr][nc] + 1
 
-class Path
-  attr_reader :current, :positions
-
-  def initialize(current, peak, positions = 0)
-    @current = current
-    @positions = positions
-    @peak = peak
-    @height = 0
-  end
-
-  def move?(map, visited, dir)
-    next_x, next_y = next_position(dir)
-
-    # Position needs to be within the limits of the map
-    return false unless next_x < map.row_count && next_y < map.column_count && next_x >= 0 && next_y >= 0
-
-    # We don't want to visit already visited places
-    return false unless visited[next_x, next_y].zero?
-
-    current_x, current_y = @current
-    h = map[current_x, current_y]
-
-    # We can only go up one step at the time
-    return (map[next_x, next_y] - h).abs <= 1 if map[next_x, next_y] >= h
-
-    # We can go down as much as we want
-    true
-  end
-
-  def move(dir)
-    position = next_position(dir)
-    @current = position
-    @positions += 1
-  end
-
-  def next_position(dir)
-    dir_x, dir_y = dir
-    next_x = @current[0] + dir_x
-    next_y = @current[1] + dir_y
-    [next_x, next_y]
-  end
-end
-
-def solve(filename)
-  grid, start, finish = parse_file(filename)
-  find_shortest_path(grid, start, finish).positions
-end
-
-def solve2(filename)
-  grid, _, finish = parse_file(filename)
-  start_positions = []
-  grid.each_with_index do |h, i, j|
-    start_positions.push([i, j]) if h.zero?
-  end
-  start_positions.map do |start|
-    p = find_shortest_path(grid, start, finish)
-    if p.nil?
-      # Is this cheating? Don't know but it works ¯\_(ツ)_/¯
-      nil
-    else
-      p.positions
-    end
-  end.compact.min
-end
-
-def find_shortest_path(grid, start, finish)
-  visited = Matrix.zero(grid.row_count, grid.column_count)
-  q = [Path.new(start, grid.map { |height, _i, _j| height }.max)]
-  while q.any?
-    path = q.shift
-    current_x, current_y = path.current
-
-    next if visited[current_x, current_y] == 1
-
-    visited[current_x, current_y] = 1
-
-    return path if path.current == finish
-
-    MOVEMENTS.filter { |dir| path.move?(grid, visited, dir) }.each do |dir|
-      clone = path.clone
-      clone.move(dir)
-      q.push(clone)
+      dist[[nr, nc]] = dist[[r, c]] + 1
+      queue << [nr, nc]
     end
   end
+  dist
 end
 
-compare_solutions(31, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve(input)
+  heights, start, finish = parse_input(input)
+  distances_to(heights, finish)[start]
+end
 
-compare_solutions(29, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+def solve2(input)
+  heights, _, finish = parse_input(input)
+  distances_to(heights, finish).select { |(r, c), _| heights[r][c].zero? }.values.min
+end
+
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    Sabqponm
+    abcryxxl
+    accszExk
+    acctuvwj
+    abdefghi
+  INPUT
+
+  def test_solve_example
+    assert_equal 31, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 420, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 29, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 414, solve2(read_file('input.txt'))
+  end
+end

@@ -1,109 +1,78 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
-
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
-end
+require_relative '../../lib/aoc'
 
 TOTAL = 70_000_000
 REQUIRED = 30_000_000
 
-# Class to represent what a directory/file is.
-# Directories contain a list of files and directories and do not have a size unless calculated.
-class Node
-  attr_accessor :name, :weight, :neighbors
-  attr_reader :parent
-
-  def initialize(name, weight = 0, parent = nil)
-    @name = name
-    @parent = parent
-    @neighbors = []
-    @weight = weight
-  end
-end
-
-def solve(filename)
-  root, directories = parse_content(filename)
-  traverse_tree(root)
-
-  directories.select { |n| n.weight < 100_000 }.sum(&:weight)
-end
-
-def solve2(filename)
-  root, directories = parse_content(filename)
-  traverse_tree(root)
-
-  # Calculate the nodes that by deleting it would free enough space required to update the system.
-  directories.map(&:weight).select { |d| TOTAL - root.weight + d > REQUIRED }.min
-end
-
-def parse_content(filename)
-  root = Node.new('/')
-  directories = [root]
-  current_node = root
-  reading_ls = false
-  read_file(filename).each_line do |line|
-    if line.include? '$'
-      _, cmd, name = line.split(' ')
-      case cmd
-      when 'cd'
-        current_node = case name
-                       when '/'
-                         root
-                       when '..'
-                         current_node.parent
-                       else
-                         current_node.neighbors.find { |n| n.name == name }
-                       end
-      when 'ls'
-        reading_ls = true
-        next
-      end
-    elsif reading_ls
-      first, name = line.split(' ')
-      if first == 'dir'
-        n = Node.new(name, 0, current_node)
-        current_node.neighbors << n
-        directories << n
-      else
-        weight = first.to_i
-        current_node.neighbors << Node.new(name, weight, current_node)
-      end
-    end
-  end
-  [root, directories]
-end
-
-def traverse_tree(root)
-  queue = [root]
-  while queue.any?
-    current = queue.shift
-    next if current.weight.positive?
-
-    if current.neighbors.all? { |n| n.weight.positive? }
-      current.weight = current.neighbors.sum(&:weight)
+# Returns a hash of directory path => total size (including subdirectories).
+def directory_sizes(input)
+  sizes = Hash.new(0)
+  path = []
+  input.each_line do |line|
+    case line.split
+    in ['$', 'cd', '/'] then path = ['/']
+    in ['$', 'cd', '..'] then path.pop
+    in ['$', 'cd', name] then path.push(name)
+    in [size, _] if size.match?(/\A\d+\z/)
+      path.each_index { |i| sizes[path[0..i].join('/')] += size.to_i }
+    else
       next
     end
-
-    current.neighbors.select { |n| n.weight.zero? && !n.neighbors.empty? }.each do |n|
-      queue << n
-    end
-
-    queue << current
-
   end
+  sizes
 end
 
-compare_solutions(95_437, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve(input)
+  directory_sizes(input).values.select { |s| s <= 100_000 }.sum
+end
 
-compare_solutions(24_933_642, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+def solve2(input)
+  sizes = directory_sizes(input)
+  needed = REQUIRED - (TOTAL - sizes['/'])
+  sizes.values.select { |s| s >= needed }.min
+end
+
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    $ cd /
+    $ ls
+    dir a
+    14848514 b.txt
+    8504156 c.dat
+    dir d
+    $ cd a
+    $ ls
+    dir e
+    29116 f
+    2557 g
+    62596 h.lst
+    $ cd e
+    $ ls
+    584 i
+    $ cd ..
+    $ cd ..
+    $ cd d
+    $ ls
+    4060174 j
+    8033020 d.log
+    5626152 d.ext
+    7214296 k
+  INPUT
+
+  def test_solve_example
+    assert_equal 95_437, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 1_432_936, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 24_933_642, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 272_298, solve2(read_file('input.txt'))
+  end
+end

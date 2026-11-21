@@ -1,52 +1,6 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
-
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
-end
-
-def parse_input(filename)
-  monkeys = []
-  items = []
-  operation = nil
-  by = nil
-  divisible_by = nil
-  if_true = nil
-  read_file(filename).each_line do |line|
-    line.strip.match(/Starting items: (.*)/) do |match|
-      items = match[1].split(',').map(&:strip).map(&:to_i)
-    end
-
-    line.strip.match(/Operation: new = old (.) (.*)/) do |match|
-      operation = match[1]
-      by = match[2]
-    end
-
-    line.strip.match(/Test: divisible by (\d+)/) do |match|
-      divisible_by = match[1].to_i
-    end
-
-    line.strip.match(/If true: throw to monkey (\d+)/) do |match|
-      if_true = match[1].to_i
-    end
-
-    line.strip.match(/If false: throw to monkey (\d+)/) do |match|
-      if_false = match[1].to_i
-
-      monkeys << Monkey.new(items, operation, by, divisible_by, [if_true, if_false])
-    end
-  end
-
-  monkeys
-end
+require_relative '../../lib/aoc'
 
 class Monkey
   attr_reader :inspected, :divisible_by
@@ -61,14 +15,15 @@ class Monkey
   end
 
   def items?
-    @items.size.positive?
+    @items.any?
   end
 
-  def inspect_item(reducer = 1)
+  # Returns [new worry level, monkey to throw to].
+  def inspect_item(reducer: 1, modulo: nil)
     @inspected += 1
-    item = (operate(@items.shift) / reducer).floor
-    throw_to = test(item)
-    [item, throw_to]
+    item = operate(@items.shift) / reducer
+    item %= modulo if modulo
+    [item, (item % @divisible_by).zero? ? @to_throw[0] : @to_throw[1]]
   end
 
   def take(item)
@@ -77,80 +32,89 @@ class Monkey
 
   private
 
-  def test(item)
-    if (item % @divisible_by).zero?
-      @to_throw[0]
-    else
-      @to_throw[1]
-    end
-  end
-
   def operate(item)
-    by = if @by == 'old'
-           item
-         else
-           @by.to_i
-         end
-    case @operation
-    when '+'
-      item + by
-    when '*'
-      item * by
-    when 'old'
-      item * item
-    else
-      raise "Unknown operation: #{@operation}"
-    end
-  end
-
-  def to_s
-    "Monkey:
-  Starting items: #{@items.join(', ')}
-  Operation: new = old #{@operation} #{@by}
-  Test: divisible by #{@divisible_by}
-    If true: throw to monkey #{@to_throw[0]}
-    If false: throw to monkey #{@to_throw[1]}\n"
+    by = @by == 'old' ? item : @by.to_i
+    @operation == '+' ? item + by : item * by
   end
 end
 
-def solve(filename)
-  monkeys = parse_input(filename)
+def parse_input(input)
+  input.split("\n\n").map do |block|
+    items = block[/Starting items: (.*)/, 1].split(', ').map(&:to_i)
+    operation, by = block.match(/new = old (.) (\S+)/).captures
+    divisible_by = block[/divisible by (\d+)/, 1].to_i
+    if_true = block[/If true: throw to monkey (\d+)/, 1].to_i
+    if_false = block[/If false: throw to monkey (\d+)/, 1].to_i
+    Monkey.new(items, operation, by, divisible_by, [if_true, if_false])
+  end
+end
 
-  20.times do |_round|
+def monkey_business(monkeys, rounds, **)
+  rounds.times do
     monkeys.each do |monkey|
       while monkey.items?
-        item, throw_to = monkey.inspect_item(3)
+        item, throw_to = monkey.inspect_item(**)
         monkeys[throw_to].take(item)
       end
     end
   end
-
-  inspected_items = monkeys.map(&:inspected).sort.reverse
-  inspected_items[0] * inspected_items[1]
+  monkeys.map(&:inspected).max(2).reduce(:*)
 end
 
-def solve2(filename)
-  monkeys = parse_input(filename)
+def solve(input)
+  monkey_business(parse_input(input), 20, reducer: 3)
+end
 
-  # https://en.wikipedia.org/wiki/Chinese_remainder_theorem
-  divider = monkeys.map(&:divisible_by).reduce(1.0) { |a, b| Float(a * b) }.floor
+def solve2(input)
+  monkeys = parse_input(input)
+  # Worry levels only matter modulo the product of all divisors.
+  monkey_business(monkeys, 10_000, modulo: monkeys.map(&:divisible_by).reduce(:*))
+end
 
-  10_000.times do |_round|
-    monkeys.each do |monkey|
-      while monkey.items?
-        item, throw_to = monkey.inspect_item
-        item %= divider
-        monkeys[throw_to].take(item)
-      end
-    end
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    Monkey 0:
+      Starting items: 79, 98
+      Operation: new = old * 19
+      Test: divisible by 23
+        If true: throw to monkey 2
+        If false: throw to monkey 3
+
+    Monkey 1:
+      Starting items: 54, 65, 75, 74
+      Operation: new = old + 6
+      Test: divisible by 19
+        If true: throw to monkey 2
+        If false: throw to monkey 0
+
+    Monkey 2:
+      Starting items: 79, 60, 97
+      Operation: new = old * old
+      Test: divisible by 13
+        If true: throw to monkey 1
+        If false: throw to monkey 3
+
+    Monkey 3:
+      Starting items: 74
+      Operation: new = old + 3
+      Test: divisible by 17
+        If true: throw to monkey 0
+        If false: throw to monkey 1
+  INPUT
+
+  def test_solve_example
+    assert_equal 10_605, solve(EXAMPLE)
   end
 
-  inspected_items = monkeys.map(&:inspected).sort.reverse
-  inspected_items[0] * inspected_items[1]
+  def test_solve_input
+    assert_equal 55_930, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 2_713_310_158, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 14_636_993_466, solve2(read_file('input.txt'))
+  end
 end
-
-compare_solutions(10_605, solve('test.txt'))
-puts 'Part1', solve('input.txt')
-
-compare_solutions(2_713_310_158, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')

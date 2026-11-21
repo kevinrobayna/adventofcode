@@ -1,179 +1,81 @@
 # frozen_string_literal: true
 
-require 'matrix'
+require_relative '../../lib/aoc'
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
-
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
-end
-
-CYCLES = {
-  'noop' => 1,
-  'addx' => 2
+# AoC 4x6 font, each letter as its 6 rows joined.
+FONT = {
+  '.##.#..##..######..##..#' => 'A',
+  '###.#..####.#..##..####.' => 'B',
+  '.##.#..##...#...#..#.##.' => 'C',
+  '#####...###.#...#...####' => 'E',
+  '#####...###.#...#...#...' => 'F',
+  '.##.#..##...#.###..#.###' => 'G',
+  '#..##..######..##..##..#' => 'H',
+  '..##...#...#...##..#.##.' => 'J',
+  '#..##.#.##..#.#.#.#.#..#' => 'K',
+  '#...#...#...#...#...####' => 'L',
+  '.##.#..##..##..##..#.##.' => 'O',
+  '###.#..##..####.#...#...' => 'P',
+  '###.#..##..####.#.#.#..#' => 'R',
+  '.####...#....##....####.' => 'S',
+  '#..##..##..##..##..#.##.' => 'U',
+  '####...#..#..#..#...####' => 'Z'
 }.freeze
 
-class Instruction
-  attr_reader :name, :value
-
-  def initialize(name, value = 0)
-    @name = name
-    @value = value
-    @remaining_cycles = CYCLES[name]
-    @running = false
-  end
-
-  def running?
-    @running
-  end
-
-  def run
-    @running = true
-    @remaining_cycles -= 1
-  end
-
-  def finished?
-    @remaining_cycles.zero?
-  end
-
-  def noop?
-    @name == 'noop'
-  end
-
-  def to_s
-    if noop?
-      @name
-    else
-      "#{@name} #{@value}"
-    end
+# Value of the X register during each cycle (index 0 is cycle 1).
+def register_values(input)
+  x = 1
+  input.each_line.flat_map do |line|
+    op, value = line.split
+    during = op == 'addx' ? [x, x] : [x]
+    x += value.to_i
+    during
   end
 end
 
-def solve(filename)
-  clock_values = { 1 => 1 }
-  instructions = instructions(filename)
-
-  clock = 1
-  current_instruction = instructions.shift
-  while clock <= 220 && instructions.size.positive?
-    if current_instruction.finished?
-      clock_values[clock] = clock_values[clock - 1] + current_instruction.value
-      current_instruction = instructions.shift
-    end
-    current_instruction.run
-
-    clock += 1
-    clock_values[clock] = clock_values[clock - 1]
-  end
-
-  expected_clock_values = [20, 60, 100, 140, 180, 220]
-  expected_clock_values.map { clock_values[_1] * _1 }.sum
+def solve(input)
+  values = register_values(input)
+  [20, 60, 100, 140, 180, 220].sum { |cycle| cycle * values[cycle - 1] }
 end
 
-class Sprite
-  def initialize
-    sprite = Array.new(40, '.')
-    sprite[0] = '#'
-    sprite[1] = '#'
-    sprite[2] = '#'
-    @sprite = sprite
-  end
-
-  def to_s
-    @sprite.join
-  end
-
-  def [](index)
-    @sprite[index]
-  end
-
-  def registry
-    @sprite.find_index('#')
-  end
-
-  def shift(chars)
-    if chars.positive?
-      chars.times do
-        char = @sprite.pop
-        @sprite.unshift(char)
-      end
-    else
-      chars.abs.times do
-        char = @sprite.shift
-        @sprite.push(char)
-      end
-    end
-    raise unless @sprite.size == 40
-
-    count = @sprite.select { _1 == '#' }.size
-    raise "Expected 3# but got #{count} after moving N #{chars}" unless count == 3
-
-    chars
-  end
+def render(input)
+  register_values(input).first(240).each_slice(40).map do |row|
+    row.each_with_index.map { |x, col| (x - col).abs <= 1 ? '#' : '.' }.join
+  end.join("\n")
 end
 
-def solve2(filename)
-  instructions = instructions(filename)
-  screen = Matrix.build(6, 40) { '.' }
-  sprite = Sprite.new
-
-  puts "Sprite position: #{sprite}"
-
-  current_instruction = nil
-
-  screen.each_with_index do |_, row, col|
-    clock = row * 40 + col + 1
-    if current_instruction.nil? || current_instruction.finished?
-      current_instruction = instructions.shift
-      puts "Start cycle   #{clock}: begin executing #{current_instruction}"
-    end
-
-    current_instruction.run
-
-    puts "During cycle  #{clock}: CRT draws pixel in position #{col}"
-    screen[row, col] = sprite[col]
-
-    puts "Current CRT row: #{screen.row(row).to_a.join}"
-    if current_instruction.finished?
-      if current_instruction.noop?
-        puts "End of cycle  #{clock}: finish executing #{current_instruction}"
-      else
-        sprite.shift(current_instruction.value)
-        puts "End of cycle  #{clock}: finish executing #{current_instruction} (Register X is now #{sprite.registry})"
-      end
-    end
-    puts "Sprite position: #{sprite}" unless current_instruction.noop?
-    puts
-  end
-  screen.to_a.map(&:join).join("\n")
+def decode(screen)
+  rows = screen.split("\n")
+  (0...8).map { |i| FONT.fetch(rows.map { |r| r[i * 5, 4] }.join, '?') }.join
 end
 
-def instructions(filename)
-  read_file(filename).each_line.map do |line|
-    name, value = line.split(' ')
-    if value
-      Instruction.new(name, value.to_i)
-    else
-      Instruction.new(name)
-    end
-  end
+def solve2(input)
+  decode(render(input))
 end
 
-compare_solutions(13_140, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+class AoCTest < Minitest::Test
+  EXAMPLE_SCREEN = <<~SCREEN.chomp
+    ##..##..##..##..##..##..##..##..##..##..
+    ###...###...###...###...###...###...###.
+    ####....####....####....####....####....
+    #####.....#####.....#####.....#####.....
+    ######......######......######......####
+    #######.......#######.......#######.....
+  SCREEN
 
-expected = "##..##..##..##..##..##..##..##..##..##..
-###...###...###...###...###...###...###.
-####....####....####....####....####....
-#####.....#####.....#####.....#####.....
-######......######......######......####
-#######.......#######.......#######....."
-compare_solutions(expected, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+  def test_solve_example
+    assert_equal 13_140, solve(read_file('test.txt'))
+  end
+
+  def test_solve_input
+    assert_equal 17_180, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal EXAMPLE_SCREEN, render(read_file('test.txt'))
+  end
+
+  def test_solve2_input
+    assert_equal 'REHPRLUB', solve2(read_file('input.txt'))
+  end
+end

@@ -1,17 +1,6 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
-
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
-end
+require_relative '../../lib/aoc'
 
 MOVEMENTS = {
   'R' => [1, 0],
@@ -20,79 +9,73 @@ MOVEMENTS = {
   'D' => [0, -1]
 }.freeze
 
-class Knot
-  attr_reader :pos_x, :pos_y
+def tail_positions(input, knot_count)
+  knots = Array.new(knot_count) { [0, 0] }
+  visited = Set[[0, 0]]
+  input.each_line do |line|
+    direction, steps = line.split
+    dx, dy = MOVEMENTS[direction]
+    steps.to_i.times do
+      knots[0] = [knots[0][0] + dx, knots[0][1] + dy]
+      (1...knot_count).each do |i|
+        hx, hy = knots[i - 1]
+        tx, ty = knots[i]
+        next if [(hx - tx).abs, (hy - ty).abs].max <= 1
 
-  def initialize
-    @pos_x = 0
-    @pos_y = 0
-    @memory = Set.new([0, 0])
-  end
-
-  def move(direction)
-    next_x, next_y = MOVEMENTS[direction]
-    @pos_x += next_x
-    @pos_y += next_y
-
-    @memory.add([@pos_x, @pos_y])
-  end
-
-  # Move tail to follow head
-  # Since we are moving each position at the time, one node can be:
-  #   0 steps away -> no movement
-  #   1 or 2 steps away (ahead) -> move towards on the same axis (x++ or y++)
-  #   -1 or -2 steps away (behind) -> move behind on the same axis (x-- or y--)
-  def follow(other)
-    return unless nearby?(other)
-
-    move_x = other.pos_x - @pos_x
-    move_y = other.pos_y - @pos_y
-    @pos_x += move_x.abs == 2 ? move_x / 2 : move_x
-    @pos_y += move_y.abs == 2 ? move_y / 2 : move_y
-
-    @memory.add([@pos_x, @pos_y])
-  end
-
-  def steps
-    @memory.size
-  end
-
-  private
-
-  def nearby?(other)
-    [(other.pos_x - @pos_x).abs, (other.pos_y - @pos_y).abs].max > 1
-  end
-end
-
-def solve(filename)
-  calculate_tail_positions(filename, 2)
-end
-
-def solve2(filename)
-  calculate_tail_positions(filename, 10)
-end
-
-def calculate_tail_positions(filename, knot_count)
-  knots = Array.new(knot_count) { Knot.new }
-
-  read_file(filename).each_line.map do |line|
-    direction, movement = line.split(' ')
-    movement.to_i.times do
-      knots.each.with_index do |knot, inx|
-        if inx.zero?
-          knot.move(direction)
-        else
-          knot.follow(knots[inx - 1])
-        end
+        # Move one step towards the knot ahead on each axis.
+        knots[i] = [tx + (hx <=> tx), ty + (hy <=> ty)]
       end
+      visited << knots.last
     end
   end
-  knots.last.steps
+  visited.size
 end
 
-compare_solutions(13, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve(input)
+  tail_positions(input, 2)
+end
 
-compare_solutions(1, solve2('test.txt'))
-compare_solutions(36, solve2('test2.txt'))
-puts 'Part2', solve2('input.txt')
+def solve2(input)
+  tail_positions(input, 10)
+end
+
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    R 4
+    U 4
+    L 3
+    D 1
+    R 4
+    D 1
+    L 5
+    R 2
+  INPUT
+
+  EXAMPLE2 = <<~INPUT
+    R 5
+    U 8
+    L 8
+    D 3
+    R 17
+    D 10
+    L 25
+    U 20
+  INPUT
+
+  def test_solve_example
+    assert_equal 13, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 5883, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 1, solve2(EXAMPLE)
+    assert_equal 36, solve2(EXAMPLE2)
+  end
+
+  def test_solve2_input
+    assert_equal 2367, solve2(read_file('input.txt'))
+  end
+end

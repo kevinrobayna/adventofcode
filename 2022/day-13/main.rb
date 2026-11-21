@@ -1,104 +1,81 @@
 # frozen_string_literal: true
 
+require_relative '../../lib/aoc'
 require 'json'
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
-
-  puts "Congratulations! Got expected result (#{expected})"
+def parse_input(input)
+  input.split("\n").reject(&:empty?).map { |line| JSON.parse(line) }
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
-end
-
-def parse_file(filename)
-  read_file(filename).each_line.reject { _1.strip.empty? }.map { JSON.parse(_1.strip) }
-end
-
-def solve(filename)
-  signals = parse_file(filename)
-
-  pair_inx = 1
-  index_sum = []
-  (0...signals.length).step(2).each do |signal|
-    left = signals[signal]
-    right = signals[signal + 1]
-    puts "\n== Pair #{pair_inx} =="
-    result = compare(left, right)
-    index_sum << pair_inx if result.positive?
-    pair_inx += 1
-  end
-
-  puts "\n== Results == [#{index_sum.join(', ')}]"
-  index_sum.sum
-end
-
+# Returns -1 when left comes before right, 1 when after, 0 when undecided.
 def compare(left, right)
-  puts "- Compare #{left} vs #{right}"
-  if left.instance_of?(Integer) && right.instance_of?(Integer)
-    if left < right
-      puts '- Left side is smaller, so inputs are in the right order'
-      return 1
-    elsif left > right
-      puts '- Right side is smaller, so inputs are not in the right order'
-      return -1
-    end
-  elsif left.instance_of?(Array) && right.instance_of?(Array)
-    (0...left.length).each do |i|
-      break if left[i].nil? || right[i].nil?
+  case [left, right]
+  in [Integer, Integer] then left <=> right
+  in [Array, Array]
+    left.zip(right).each do |l, r|
+      return 1 if r.nil?
 
-      result = compare(left[i], right[i])
-      return result if result.positive? || result.negative?
+      result = compare(l, r)
+      return result unless result.zero?
     end
-    if left.length < right.length
-      puts '- Left side ran out of items, so inputs are in the right order'
-      return 1
-    elsif left.length > right.length
-      puts '- Right side ran out of items, so inputs are not in the right order'
-      return -1
-    end
-  elsif left.instance_of?(Array) || right.instance_of?(Array)
-    if left.instance_of?(Array)
-      if right.nil?
-        puts '- Right side ran out of items, so inputs are not in the right order'
-        return -1
-      end
-      puts "- Mixed types; convert right to [#{right}] and retry comparison"
-      result = compare(left, [right])
-    else
-      if left.nil?
-        puts '- Left side ran out of items, so inputs are in the right order'
-        return 1
-      end
-      puts "- Mixed types; convert left to [#{left}] and retry comparison"
-      result = compare([left], right)
-    end
-    return result if result.positive? || result.negative?
+    left.size <=> right.size
+  in [Integer, Array] then compare([left], right)
+  in [Array, Integer] then compare(left, [right])
   end
-  0
 end
 
-def solve2(filename)
-  signals = parse_file(filename)
-  signals.push([[2]], [[6]])
-
-  sorted = signals.sort do |a, b|
-    result = compare(a, b)
-    result.positive? ? -1 : 1
+def solve(input)
+  parse_input(input).each_slice(2).with_index(1).sum do |(left, right), inx|
+    compare(left, right).negative? ? inx : 0
   end
-
-  div_one = sorted.find_index([[2]]) + 1
-  div_two = sorted.find_index([[6]]) + 1
-
-  div_one * div_two
 end
 
-compare_solutions(13, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve2(input)
+  dividers = [[[2]], [[6]]]
+  sorted = (parse_input(input) + dividers).sort { |a, b| compare(a, b) }
+  dividers.map { |d| sorted.index(d) + 1 }.reduce(:*)
+end
 
-compare_solutions(140, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    [1,1,3,1,1]
+    [1,1,5,1,1]
+
+    [[1],[2,3,4]]
+    [[1],4]
+
+    [9]
+    [[8,7,6]]
+
+    [[4,4],4,4]
+    [[4,4],4,4,4]
+
+    [7,7,7,7]
+    [7,7,7]
+
+    []
+    [3]
+
+    [[[]]]
+    [[]]
+
+    [1,[2,[3,[4,[5,6,7]]]],8,9]
+    [1,[2,[3,[4,[5,6,0]]]],8,9]
+  INPUT
+
+  def test_solve_example
+    assert_equal 13, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 5808, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 140, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 22_713, solve2(read_file('input.txt'))
+  end
+end

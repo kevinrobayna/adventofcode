@@ -1,42 +1,50 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require_relative '../../lib/aoc'
 
-  puts "Congratulations! Got expected result (#{expected})"
+def solve(input)
+  sorted_snacks(input).last
 end
 
-def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
-  File.read(File.join(__dir__, filename))
+def solve2(input)
+  sorted_snacks(input).last(3).sum
 end
 
-def solve(filename)
-  get_sorted_snacks(filename).last
+def sorted_snacks(input)
+  input.split("\n\n").map { |elf| elf.split.sum(&:to_i) }.sort
 end
 
-def solve2(filename)
-  snacks = get_sorted_snacks(filename)
-  snacks[-1] + snacks[-2] + snacks[-3]
-end
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    1000
+    2000
+    3000
 
-def get_sorted_snacks(filename)
-  sums = [0]
-  read_file(filename).split("\n").each do |line|
-    if line.empty?
-      sums.push(0)
-      next
-    end
+    4000
 
-    sums[-1] = sums[-1] + line.to_i
+    5000
+    6000
+
+    7000
+    8000
+    9000
+
+    10000
+  INPUT
+
+  def test_solve_example
+    assert_equal 24_000, solve(EXAMPLE)
   end
-  sums.sort
+
+  def test_solve_input
+    assert_equal 69_836, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 45_000, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 207_968, solve2(read_file('input.txt'))
+  end
 end
-
-compare_solutions(24_000, solve('test.txt'))
-puts 'Part1', solve('input.txt')
-
-compare_solutions(45_000, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
