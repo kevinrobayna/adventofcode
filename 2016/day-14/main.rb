@@ -9,9 +9,10 @@ def read_file(filename)
   File.read(File.join(__dir__, filename))
 end
 require 'digest'
+require 'etc'
 
 # Maps items across forked worker processes (MD5 stretching is CPU bound).
-def parallel_map(items, workers: 8, &block)
+def parallel_map(items, workers: Etc.nprocessors, &block)
   items.each_slice((items.size / workers.to_f).ceil).map do |slice|
     reader, writer = IO.pipe
     pid = fork do
