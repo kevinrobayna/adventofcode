@@ -1,30 +1,49 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def changes(input)
+  input.split(/[\s,]+/).reject(&:empty?).map(&:to_i)
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def solve(input)
+  changes(input).sum
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve2(input)
+  seen = Set[0]
+  freq = 0
+  changes(input).cycle do |c|
+    freq += c
+    return freq unless seen.add?(freq)
+  end
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+class AoCTest < Minitest::Test
+  def test_solve_example
+    assert_equal 3, solve("+1\n-2\n+3\n+1\n")
+    assert_equal 0, solve("+1\n+1\n-2\n")
+    assert_equal(-6, solve("-1\n-2\n-3\n"))
+  end
+
+  def test_solve_input
+    assert_equal 486, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 2, solve2("+1\n-2\n+3\n+1\n")
+    assert_equal 0, solve2("+1\n-1\n")
+    assert_equal 10, solve2("+3\n+3\n+4\n-2\n-4\n")
+    assert_equal 5, solve2("-6\n+3\n+8\n+5\n-6\n")
+    assert_equal 14, solve2("+7\n+7\n-2\n-7\n-4\n")
+  end
+
+  def test_solve2_input
+    assert_equal 69_285, solve2(read_file('input.txt'))
+  end
+end
