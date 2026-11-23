@@ -1,30 +1,85 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
+require_relative '../min_heap'
 
-def solve(filename)
-  read_file(filename)
-  0
+def lowest_risk(grid)
+  rows = grid.size
+  cols = grid[0].size
+  dist = Array.new(rows * cols, Float::INFINITY)
+  dist[0] = 0
+  heap = MinHeap.new
+  heap.push([0, 0])
+  target = (rows * cols) - 1
+  until heap.empty?
+    d, idx = heap.pop
+    return d if idx == target
+    next if d > dist[idx]
+
+    r, c = idx.divmod(cols)
+    [[r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1]].each do |nr, nc|
+      next unless nr.between?(0, rows - 1) && nc.between?(0, cols - 1)
+
+      nd = d + grid[nr][nc]
+      nidx = (nr * cols) + nc
+      next unless nd < dist[nidx]
+
+      dist[nidx] = nd
+      heap.push([nd, nidx])
+    end
+  end
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def parse(input)
+  input.split("\n").map { |line| line.chars.map(&:to_i) }
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve(input)
+  lowest_risk(parse(input))
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+def solve2(input)
+  tile = parse(input)
+  rows = tile.size
+  cols = tile[0].size
+  grid = Array.new(rows * 5) do |r|
+    Array.new(cols * 5) { |c| ((tile[r % rows][c % cols] + (r / rows) + (c / cols) - 1) % 9) + 1 }
+  end
+  lowest_risk(grid)
+end
+
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    1163751742
+    1381373672
+    2136511328
+    3694931569
+    7463417111
+    1319128137
+    1359912421
+    3125421639
+    1293138521
+    2311944581
+  INPUT
+
+  def test_solve_example
+    assert_equal 40, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 472, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 315, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 2851, solve2(read_file('input.txt'))
+  end
+end
