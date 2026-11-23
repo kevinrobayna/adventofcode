@@ -1,30 +1,62 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+TICKER = {
+  'children' => 3, 'cats' => 7, 'samoyeds' => 2, 'pomeranians' => 3, 'akitas' => 0,
+  'vizslas' => 0, 'goldfish' => 5, 'trees' => 3, 'cars' => 2, 'perfumes' => 1
+}.freeze
+
+RANGES = {
+  'cats' => :>, 'trees' => :>, 'pomeranians' => :<, 'goldfish' => :<
+}.freeze
+
+def parse_sues(input)
+  input.lines.to_h do |line|
+    id = line[/Sue (\d+)/, 1].to_i
+    [id, line.scan(/(\w+): (\d+)/).to_h { |k, v| [k, v.to_i] }]
+  end
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def find_sue(input, comparisons = {})
+  parse_sues(input).find do |_, things|
+    things.all? { |thing, n| n.public_send(comparisons.fetch(thing, :==), TICKER.fetch(thing)) }
+  end&.first
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve(input)
+  find_sue(input)
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+def solve2(input)
+  find_sue(input, RANGES)
+end
+
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    Sue 1: children: 1, cars: 8, vizslas: 7
+    Sue 2: cats: 7, trees: 3, goldfish: 5
+    Sue 3: cats: 8, trees: 4, goldfish: 4
+  INPUT
+
+  def test_solve_example
+    assert_equal 2, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 213, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 3, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 323, solve2(read_file('input.txt'))
+  end
+end
