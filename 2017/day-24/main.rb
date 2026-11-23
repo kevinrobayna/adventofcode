@@ -1,30 +1,70 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+# Returns [max strength, [max length, strength of the strongest longest]] of bridges continuing from `port`.
+def best_bridges(by_port, port, used)
+  best = 0
+  longest = [0, 0]
+  by_port[port].each do |i, a, b|
+    next if used[i]
+
+    used[i] = true
+    strength, (len, len_strength) = best_bridges(by_port, a == port ? b : a, used)
+    used[i] = false
+    best = [best, strength + a + b].max
+    longest = [longest, [len + 1, len_strength + a + b]].max
+  end
+  [best, longest]
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def bridges(input)
+  by_port = Hash.new { |h, k| h[k] = [] }
+  input.lines.map { |l| l.split('/').map(&:to_i) }.reject(&:empty?).each_with_index do |(a, b), i|
+    by_port[a] << [i, a, b]
+    by_port[b] << [i, a, b] unless a == b
+  end
+  best_bridges(by_port, 0, [])
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve(input)
+  bridges(input)[0]
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+def solve2(input)
+  bridges(input)[1][1]
+end
+
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    0/2
+    2/2
+    2/3
+    3/4
+    3/5
+    0/1
+    10/1
+    9/10
+  INPUT
+
+  def test_solve_example
+    assert_equal 31, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 1_511, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 19, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 1_471, solve2(read_file('input.txt'))
+  end
+end
