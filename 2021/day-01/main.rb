@@ -1,46 +1,55 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  numbers = read_file(filename).split("\n").reject(&:empty?).map(&:to_i)
-  count_increases(numbers)
-end
-
-def solve2(filename)
-  numbers = read_file(filename).split("\n").reject(&:empty?).map(&:to_i)
-  aggregated_numbers = []
-  numbers.each_with_index do |value, index|
-    next if index < 2
-
-    aggregated_numbers.append(numbers[index - 2] + numbers[index - 1] + value)
-  end
-  count_increases(aggregated_numbers)
+def parse(input)
+  input.split("\n").reject(&:empty?).map(&:to_i)
 end
 
 def count_increases(numbers)
-  counter = 0
-  numbers.each_with_index do |value, index|
-    next if index.eql? 0
-
-    counter += 1 if numbers[index - 1] < value
-  end
-  counter
+  numbers.each_cons(2).count { |a, b| a < b }
 end
 
-compare_solutions(7, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve(input)
+  count_increases(parse(input))
+end
 
-compare_solutions(5, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+def solve2(input)
+  count_increases(parse(input).each_cons(3).map(&:sum))
+end
+
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    199
+    200
+    208
+    210
+    200
+    207
+    240
+    269
+    260
+    263
+  INPUT
+
+  def test_solve_example
+    assert_equal 7, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 1559, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 5, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 1600, solve2(read_file('input.txt'))
+  end
+end
