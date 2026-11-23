@@ -1,30 +1,83 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def decks(input)
+  input.split("\n\n").map { |block| block.lines.drop(1).map(&:to_i) }
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def score(deck)
+  deck.reverse.each_with_index.sum { |card, i| card * (i + 1) }
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve(input)
+  a, b = decks(input)
+  until a.empty? || b.empty?
+    x = a.shift
+    y = b.shift
+    x > y ? a.push(x, y) : b.push(y, x)
+  end
+  score(a.empty? ? b : a)
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+# Returns [winner (1 or 2), winner's deck].
+def recursive_combat(a, b)
+  seen = Set.new
+  until a.empty? || b.empty?
+    return [1, a] unless seen.add?([a, b].hash)
+
+    x = a.shift
+    y = b.shift
+    winner = if a.size >= x && b.size >= y
+               recursive_combat(a.first(x), b.first(y)).first
+             else
+               x > y ? 1 : 2
+             end
+    winner == 1 ? a.push(x, y) : b.push(y, x)
+  end
+  a.empty? ? [2, b] : [1, a]
+end
+
+def solve2(input)
+  score(recursive_combat(*decks(input)).last)
+end
+
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    Player 1:
+    9
+    2
+    6
+    3
+    1
+
+    Player 2:
+    5
+    8
+    4
+    7
+    10
+  INPUT
+
+  def test_solve_example
+    assert_equal 306, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 33_631, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 291, solve2(EXAMPLE)
+    assert_equal 105, solve2("Player 1:\n43\n19\n\nPlayer 2:\n2\n29\n14\n") # terminates via loop rule
+  end
+
+  def test_solve2_input
+    assert_equal 33_469, solve2(read_file('input.txt'))
+  end
+end
