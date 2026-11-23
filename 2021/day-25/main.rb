@@ -1,30 +1,53 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def solve(input)
+  grid = input.split("\n").map(&:chars)
+  rows = grid.size
+  cols = grid[0].size
+  1.step do |turn|
+    moved = false
+    [['>', 0, 1], ['v', 1, 0]].each do |herd, dr, dc|
+      movers = []
+      grid.each_with_index do |row, r|
+        row.each_with_index do |cell, c|
+          movers << [r, c] if cell == herd && grid[(r + dr) % rows][(c + dc) % cols] == '.'
+        end
+      end
+      movers.each do |r, c|
+        grid[r][c] = '.'
+        grid[(r + dr) % rows][(c + dc) % cols] = herd
+      end
+      moved ||= movers.any?
+    end
+    return turn unless moved
+  end
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    v...>>.vv>
+    .vv>>.vv..
+    >>.>v>...v
+    >>v>>.>.v.
+    v>v.vv.v..
+    >.>>..v...
+    .vv..>.>v.
+    v.v..>>v.v
+    ....v..v.>
+  INPUT
+
+  def test_solve_example
+    assert_equal 58, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 471, solve(read_file('input.txt'))
+  end
 end
-
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
-
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
