@@ -1,30 +1,74 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def parse_pots(input)
+  initial, *rules = input.lines(chomp: true).reject(&:empty?)
+  state = initial.split(': ').last
+  plants = state.chars.each_index.select { |i| state[i] == '#' }.to_set
+  growing = rules.filter_map { |r| r[0, 5] if r.end_with?('#') }.to_set
+  [plants, growing]
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def step(plants, growing)
+  min, max = plants.minmax
+  ((min - 2)..(max + 2)).select do |i|
+    growing.include?(((i - 2)..(i + 2)).map { |j| plants.include?(j) ? '#' : '.' }.join)
+  end.to_set
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve(input, generations: 20)
+  plants, growing = parse_pots(input)
+  gen = 0
+  while gen < generations
+    nxt = step(plants, growing)
+    gen += 1
+    # Once the pattern just shifts, the sum grows linearly.
+    return nxt.sum + ((generations - gen) * (nxt.sum - plants.sum)) if nxt.map { |i| i - nxt.min } == plants.map { |i| i - plants.min }
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+    plants = nxt
+  end
+  plants.sum
+end
+
+def solve2(input)
+  solve(input, generations: 50_000_000_000)
+end
+
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    initial state: #..#.#..##......###...###
+
+    ...## => #
+    ..#.. => #
+    .#... => #
+    .#.#. => #
+    .#.## => #
+    .##.. => #
+    .#### => #
+    #.#.# => #
+    #.### => #
+    ##.#. => #
+    ##.## => #
+    ###.. => #
+    ###.# => #
+    ####. => #
+  INPUT
+
+  def test_solve_example
+    assert_equal 325, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 2045, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_input
+    assert_equal 2_100_000_000_428, solve2(read_file('input.txt'))
+  end
+end
