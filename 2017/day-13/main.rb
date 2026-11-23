@@ -1,30 +1,50 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def firewall(input)
+  input.scan(/(\d+): (\d+)/).map { |d, r| [d.to_i, r.to_i] }
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def caught?(depth, range, delay)
+  ((depth + delay) % (2 * (range - 1))).zero?
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve(input)
+  firewall(input).sum { |d, r| caught?(d, r, 0) ? d * r : 0 }
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+def solve2(input)
+  layers = firewall(input).sort_by { |_, r| r }
+  (0..).find { |delay| layers.none? { |d, r| caught?(d, r, delay) } }
+end
+
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    0: 3
+    1: 2
+    4: 4
+    6: 4
+  INPUT
+
+  def test_solve_example
+    assert_equal 24, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 1_840, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 10, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 3_850_260, solve2(read_file('input.txt'))
+  end
+end
