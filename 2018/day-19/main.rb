@@ -1,30 +1,58 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
+require_relative '../device'
 
-def solve(filename)
-  read_file(filename)
-  0
+def solve(input)
+  Device.run(*Device.parse(input))[0]
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+# The program computes the sum of the divisors of a large number. Run the setup phase until the
+# program jumps back to the start of its main loop (ip 1), then compute the sum directly.
+def solve2(input, r0: 1)
+  ip_reg, program = Device.parse(input)
+  regs = [r0, 0, 0, 0, 0, 0]
+  started = false
+  Device.run(ip_reg, program, regs) do |ip, _|
+    next :halt if started && ip == 1
+
+    started ||= ip != 0
+    nil
+  end
+  n = regs.max
+  (1..Integer.sqrt(n)).select { |d| (n % d).zero? }.flat_map { |d| [d, n / d] }.uniq.sum
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    #ip 0
+    seti 5 0 1
+    seti 6 0 2
+    addi 0 1 0
+    addr 1 2 3
+    setr 1 0 0
+    seti 8 0 4
+    seti 9 0 5
+  INPUT
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+  def test_solve_example
+    assert_equal 6, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 1848, solve(read_file('input.txt'))
+  end
+
+  def test_divisor_shortcut_matches_simulation
+    assert_equal solve(read_file('input.txt')), solve2(read_file('input.txt'), r0: 0)
+  end
+
+  def test_solve2_input
+    assert_equal 22_157_688, solve2(read_file('input.txt'))
+  end
+end
