@@ -1,30 +1,52 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def seat_id(pass)
+  pass.tr('FBLR', '0101').to_i(2)
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def solve(input)
+  input.split.map { |p| seat_id(p) }.max
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve2(input)
+  ids = input.split.map { |p| seat_id(p) }.sort
+  ids.each_cons(2).find { |a, b| b - a == 2 }.first + 1
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    BFFFBBFRRR
+    FFFBBBFRRR
+    BBFFBBFRLL
+  INPUT
+
+  def test_seat_ids
+    assert_equal 357, seat_id('FBFBBFFRLR')
+    assert_equal 567, seat_id('BFFFBBFRRR')
+    assert_equal 119, seat_id('FFFBBBFRRR')
+    assert_equal 820, seat_id('BBFFBBFRLL')
+  end
+
+  def test_solve_example
+    assert_equal 820, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 906, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 4, solve2("FFFFFFFLRL\nFFFFFFFLRR\nFFFFFFFRLR\nFFFFFFFRRL\n")
+  end
+
+  def test_solve2_input
+    assert_equal 519, solve2(read_file('input.txt'))
+  end
+end
