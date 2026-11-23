@@ -1,75 +1,69 @@
 # frozen_string_literal: true
 
-require 'pry'
-require 'colorize'
+require 'minitest/autorun'
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
-
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename, difference = 2)
-  small_grid = read_file(filename).each_line.map do |line|
-    line.strip.chars
-  end
-
+def solve(input, expansion: 2)
+  grid = input.lines.map { it.strip.chars }
   positions = []
-  empty_columns = Set.new
-  empty_rows = Set.new
-
-  small_grid.each_with_index do |row, inx_x|
-    row.each_with_index do |v, inx_y|
-      positions << [inx_x, inx_y] if v == '#'
-      if small_grid.none? { |r| r[inx_y] == '#' } && !row.include?('#')
-        empty_rows << inx_x
-        empty_columns << inx_y
-      end
-    end
+  grid.each_with_index do |row, x|
+    row.each_with_index { |v, y| positions << [x, y] if v == '#' }
   end
+  empty_rows = grid.each_index.reject { |x| grid[x].include?('#') }
+  empty_columns = grid.first.each_index.reject { |y| grid.any? { it[y] == '#' } }
 
   positions.combination(2).sum do |p1, p2|
-    distance(p1, p2, empty_rows, empty_columns, difference)
+    distance(p1, p2, empty_rows, empty_columns, expansion)
   end
 end
 
-def distance(point1, point2, empty_rows, empty_columns, separtion)
+def solve2(input, expansion: 1_000_000)
+  solve(input, expansion: expansion)
+end
+
+def distance(point1, point2, empty_rows, empty_columns, expansion)
   x, y = point1
   dx, dy = point2
-
-  distance = (x - dx).abs + (y - dy).abs
-
   x_min, x_max = [x, dx].minmax
   y_min, y_max = [y, dy].minmax
-  distance += (empty_rows.select { _1.between?(x_min, x_max) }.length * (separtion - 1))
-  distance += (empty_columns.select { _1.between?(y_min, y_max) }.length * (separtion - 1))
 
-  distance
+  (x_max - x_min) + (y_max - y_min) +
+    (empty_rows.count { it.between?(x_min, x_max) } * (expansion - 1)) +
+    (empty_columns.count { it.between?(y_min, y_max) } * (expansion - 1))
 end
 
-def debug_board(board)
-  board.each_with_index.map do |row, _inx_x|
-    row.each_with_index.map do |v, inx_y|
-      if v != '.'
-        v.red
-      elsif board.none? { |r| r[inx_y] == '#' } && !row.include?('#')
-        v.green
-      else
-        v.blue
-      end
-    end
-  end.map(&:join).join("\n")
-end
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    ...#......
+    .......#..
+    #.........
+    ..........
+    ......#...
+    .#........
+    .........#
+    ..........
+    .......#..
+    #...#.....
+  INPUT
 
-compare_solutions(374, solve('test.txt', 2))
-compare_solutions(1030, solve('test.txt', 10))
-compare_solutions(8410, solve('test.txt', 100))
-puts 'Part1', solve('input.txt', 2)
-puts 'Part2', solve('input.txt', 1_000_000)
+  def test_solve_example
+    assert_equal 374, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 9_799_681, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 1030, solve2(EXAMPLE, expansion: 10)
+    assert_equal 8410, solve2(EXAMPLE, expansion: 100)
+  end
+
+  def test_solve2_input
+    assert_equal 513_171_773_355, solve2(read_file('input.txt'))
+  end
+end
