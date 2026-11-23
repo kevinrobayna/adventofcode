@@ -1,30 +1,70 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+# Enhances the image `times` times; tracks the infinite background since algorithm[0] may be lit.
+def enhance(input, times)
+  algorithm, image = input.split("\n\n")
+  algorithm = algorithm.delete("\n").chars.map { |ch| ch == '#' }
+  grid = image.split("\n").map { |row| row.chars.map { |ch| ch == '#' } }
+  background = false
+  times.times do
+    rows = grid.size
+    cols = grid[0].size
+    grid = Array.new(rows + 2) do |r|
+      Array.new(cols + 2) do |c|
+        index = 0
+        (r - 2..r).each do |sr|
+          (c - 2..c).each do |sc|
+            lit = sr.between?(0, rows - 1) && sc.between?(0, cols - 1) ? grid[sr][sc] : background
+            index = (index << 1) | (lit ? 1 : 0)
+          end
+        end
+        algorithm[index]
+      end
+    end
+    background = background ? algorithm[511] : algorithm[0]
+  end
+  grid.sum { |row| row.count(true) }
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def solve(input)
+  enhance(input, 2)
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve2(input)
+  enhance(input, 50)
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    ..#.#..#####.#.#.#.###.##.....###.##.#..###.####..#####..#....#..#..##..###..######.###...####..#..#####..##..#.#####...##.#.#..#.##..#.#......#.###.######.###.####...#.##.##..#..#..#####.....#.#....###..#.##......#.....#..#..#..##..#...##.######.####.####.#.#...#.......#..#.#.#...####.##.#......#..#...##.#.##..#...##.#.##..###.#......#.#.......#.#.#.####.###.##...#.....####.#..#..#.##.#....##..#.####....##...##..#...#......#.#.......#.......##..####..#...#.#.#...##..#.#..###..#####........#..####......#..#
+
+    #..#.
+    #....
+    ##..#
+    ..#..
+    ..###
+  INPUT
+
+  def test_solve_example
+    assert_equal 35, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 5597, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 3351, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 18_723, solve2(read_file('input.txt'))
+  end
+end
