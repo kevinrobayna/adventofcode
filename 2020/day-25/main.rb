@@ -1,30 +1,45 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+MOD = 20_201_227
+
+def loop_size(public_key)
+  value = 1
+  size = 0
+  until value == public_key
+    value = value * 7 % MOD
+    size += 1
+  end
+  size
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def solve(input)
+  card, door = input.split.map(&:to_i)
+  door.pow(loop_size(card), MOD)
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    5764801
+    17807724
+  INPUT
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+  def test_loop_size
+    assert_equal 8, loop_size(5_764_801)
+    assert_equal 11, loop_size(17_807_724)
+  end
+
+  def test_solve_example
+    assert_equal 14_897_079, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 7_269_858, solve(read_file('input.txt'))
+  end
+end
