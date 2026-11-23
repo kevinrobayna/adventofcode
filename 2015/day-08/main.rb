@@ -1,30 +1,49 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def memory_length(literal)
+  literal[1..-2].gsub(/\\(\\|"|x\h\h)/, '.').length
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def encoded_length(literal)
+  literal.length + literal.count('"\\') + 2
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve(input)
+  input.lines.map(&:strip).sum { |line| line.length - memory_length(line) }
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+def solve2(input)
+  input.lines.map(&:strip).sum { |line| encoded_length(line) - line.length }
+end
+
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~'INPUT'
+    ""
+    "abc"
+    "aaa\"aaa"
+    "\x27"
+  INPUT
+
+  def test_solve_example
+    assert_equal 12, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 1350, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 19, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 2085, solve2(read_file('input.txt'))
+  end
+end
