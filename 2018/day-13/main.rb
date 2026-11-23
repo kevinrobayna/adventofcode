@@ -1,30 +1,104 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+Cart = Struct.new(:x, :y, :dx, :dy, :turns, :crashed)
+
+DIRS = { '>' => [1, 0], '<' => [-1, 0], '^' => [0, -1], 'v' => [0, 1] }.freeze
+
+def parse_tracks(input)
+  grid = input.lines(chomp: true)
+  carts = []
+  grid.each_with_index do |row, y|
+    row.chars.each_with_index do |c, x|
+      carts << Cart.new(x, y, *DIRS[c], 0, false) if DIRS.key?(c)
+    end
+  end
+  [grid, carts]
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def move(cart, grid)
+  cart.x += cart.dx
+  cart.y += cart.dy
+  case grid[cart.y][cart.x]
+  when '/' then cart.dx, cart.dy = -cart.dy, -cart.dx
+  when '\\' then cart.dx, cart.dy = cart.dy, cart.dx
+  when '+'
+    case cart.turns % 3
+    when 0 then cart.dx, cart.dy = cart.dy, -cart.dx # left
+    when 2 then cart.dx, cart.dy = -cart.dy, cart.dx # right
+    end
+    cart.turns += 1
+  end
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+# Yields each crash location in order; returns the last surviving cart when one remains.
+def simulate(input)
+  grid, carts = parse_tracks(input)
+  loop do
+    carts.sort_by! { |c| [c.y, c.x] }
+    carts.each do |cart|
+      next if cart.crashed
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+      move(cart, grid)
+      other = carts.find { |o| !o.equal?(cart) && !o.crashed && o.x == cart.x && o.y == cart.y }
+      next unless other
+
+      cart.crashed = other.crashed = true
+      yield cart.x, cart.y
+    end
+    carts.reject!(&:crashed)
+    return carts.first if carts.size <= 1
+  end
+end
+
+def solve(input)
+  simulate(input) { |x, y| return "#{x},#{y}" }
+end
+
+def solve2(input)
+  last = simulate(input) { nil }
+  "#{last.x},#{last.y}"
+end
+
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~'INPUT'
+    /->-\
+    |   |  /----\
+    | /-+--+-\  |
+    | | |  | v  |
+    \-+-/  \-+--/
+      \------/
+  INPUT
+
+  EXAMPLE2 = <<~'INPUT'
+    />-<\
+    |   |
+    | /<+-\
+    | | | v
+    \>+</ |
+      |   ^
+      \<->/
+  INPUT
+
+  def test_solve_example
+    assert_equal '7,3', solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal '40,90', solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal '6,4', solve2(EXAMPLE2)
+  end
+
+  def test_solve2_input
+    assert_equal '65,81', solve2(read_file('input.txt'))
+  end
+end
