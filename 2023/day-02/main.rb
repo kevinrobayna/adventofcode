@@ -1,66 +1,59 @@
 # frozen_string_literal: true
 
-require 'pry'
 require 'minitest/autorun'
 
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def parse_file(filename)
-  read_file(filename).each_line.map do |line|
+def parse(input)
+  input.each_line.to_h do |line|
     game_id, games = line.split(':')
     cubes = games.strip.split(';').map do |sets|
-      sets.split(',').map(&:split).to_h do |x|
-        [x[1].to_sym, x[0].to_i]
-      end
+      sets.split(',').map(&:split).to_h { |x| [x[1].to_sym, x[0].to_i] }
     end
 
     [game_id.split[1].to_i, cubes]
-  end.to_h
-end
-
-def solve(filename)
-  game = parse_file(filename)
-
-  limits = { red: 12, green: 13, blue: 14 }
-  possible_games = game.select do |_game_id, sets|
-    sets.all? do |x|
-      (x[:red] || 0) <= limits[:red] &&
-        (x[:green] || 0) <= limits[:green] &&
-        (x[:blue] || 0) <= limits[:blue]
-    end
   end
-  possible_games.sum { |game_id, _| game_id }
 end
 
-def solve2(filename)
-  parse_file(filename).map do |_id, sets|
-    max = { red: 0, green: 0, blue: 0 }
-    sets.each do |x|
-      max[:red] = [x[:red] || 0, max[:red]].max
-      max[:green] = [x[:green] || 0, max[:green]].max
-      max[:blue] = [x[:blue] || 0, max[:blue]].max
-    end
+def solve(input)
+  limits = { red: 12, green: 13, blue: 14 }
+  possible_games = parse(input).select do |_game_id, sets|
+    sets.all? { |x| limits.all? { |color, limit| x.fetch(color, 0) <= limit } }
+  end
+  possible_games.keys.sum
+end
 
-    max
-  end.sum do |set|
-    set[:red] * set[:blue] * set[:green]
+def solve2(input)
+  parse(input).values.sum do |sets|
+    %i[red green blue].map { |color| sets.map { |x| x.fetch(color, 0) }.max }.reduce(:*)
   end
 end
 
 class AoCTest < Minitest::Test
-  def test_solve
-    assert solve('test.txt') == 8
+  EXAMPLE = <<~INPUT
+    Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
+    Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
+    Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red
+    Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
+    Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green
+  INPUT
+
+  def test_solve_example
+    assert_equal 8, solve(EXAMPLE)
   end
 
-  def test_solve2
-    assert solve2('test.txt') == 2286
+  def test_solve_input
+    assert_equal 2545, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 2286, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 78_111, solve2(read_file('input.txt'))
   end
 end
-
-puts 'Part1', solve('input.txt')
-puts 'Part2', solve2('input.txt')
