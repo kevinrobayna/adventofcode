@@ -67,13 +67,48 @@ def moves(state, depth)
   result
 end
 
+# A* lower bound (never overestimates): every amphipod not yet settled must walk to its
+# room's door, and the ones entering a room fill its free slots from the bottom up.
+# Amphipods in their own room above a stranger must step out (and back) first.
+def min_remaining_energy(state, depth)
+  total = 0
+  entering = Array.new(4, 0)
+  (0...HALL_SIZE).each do |h|
+    kind = state[h]
+    next if kind == '.'
+
+    target = kind.ord - 65
+    total += (h - DOORS[target]).abs * ENERGY[kind]
+    entering[target] += 1
+  end
+  4.times do |room|
+    settled_below = true
+    (depth - 1).downto(0) do |slot|
+      kind = state[room_index(room, slot, depth)]
+      next if kind == '.'
+
+      target = kind.ord - 65
+      settled_below &&= target == room
+      next if settled_below
+
+      # Out of the room, then across to its door (at least one step aside and back if it is home).
+      across = target == room ? 2 : (DOORS[room] - DOORS[target]).abs
+      total += (slot + 1 + across) * ENERGY[kind]
+      entering[target] += 1
+    end
+  end
+  # The n amphipods entering a room walk 1, 2, ..., n steps down into it.
+  entering.each_with_index { |n, room| total += n * (n + 1) / 2 * ENERGY[(room + 65).chr] }
+  total
+end
+
 def least_energy(state, depth)
   goal = ('.' * HALL_SIZE) + %w[A B C D].map { |k| k * depth }.join
   dist = { state => 0 }
   heap = MinHeap.new
-  heap.push([0, state])
+  heap.push([min_remaining_energy(state, depth), 0, state])
   until heap.empty?
-    cost, current = heap.pop
+    _, cost, current = heap.pop
     return cost if current == goal
     next if cost > dist[current]
 
@@ -82,7 +117,7 @@ def least_energy(state, depth)
       next if dist.fetch(nxt, Float::INFINITY) <= new_cost
 
       dist[nxt] = new_cost
-      heap.push([new_cost, nxt])
+      heap.push([new_cost + min_remaining_energy(nxt, depth), new_cost, nxt])
     end
   end
 end
@@ -103,6 +138,15 @@ class AoCTest < Minitest::Test
       #A#D#C#A#
       #########
   INPUT
+
+  def test_min_remaining_energy
+    assert_equal 0, min_remaining_energy("#{'.' * 11}AABBCCDD", 2)
+    # A in the hallway at 0: 2 steps to door 2, 1 step into the room.
+    assert_equal 3, min_remaining_energy("A#{'.' * 10}.ABBCCDD", 2)
+    # D atop room A and A atop room D swap: each is 1 out + 6 across + 1 in (1000 + 1 energy).
+    assert_equal 8008, min_remaining_energy("#{'.' * 11}DABBCCAD", 2)
+    assert_operator min_remaining_energy(*parse(EXAMPLE)), :<=, 12_521
+  end
 
   def test_solve_example
     assert_equal 12_521, solve(EXAMPLE)
