@@ -1,30 +1,50 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+# Number of container combinations that hold exactly `liters`, grouped by container count.
+def combinations_by_size(input, liters)
+  containers = input.split.map(&:to_i)
+  (1..containers.size).to_h do |k|
+    [k, containers.combination(k).count { |combo| combo.sum == liters }]
+  end
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def solve(input, liters: 150)
+  combinations_by_size(input, liters).values.sum
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve2(input, liters: 150)
+  combinations_by_size(input, liters).values.find(&:positive?)
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    20
+    15
+    10
+    5
+    5
+  INPUT
+
+  def test_solve_example
+    assert_equal 4, solve(EXAMPLE, liters: 25)
+  end
+
+  def test_solve_input
+    assert_equal 1304, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 3, solve2(EXAMPLE, liters: 25)
+  end
+
+  def test_solve2_input
+    assert_equal 18, solve2(read_file('input.txt'))
+  end
+end
