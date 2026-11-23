@@ -1,30 +1,59 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def solve(input)
+  tallies = input.lines(chomp: true).map { |id| id.chars.tally.values }
+  tallies.count { |t| t.include?(2) } * tallies.count { |t| t.include?(3) }
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def solve2(input)
+  ids = input.lines(chomp: true)
+  ids.combination(2) do |a, b|
+    diff = a.chars.each_index.reject { |i| a[i] == b[i] }
+    return a.dup.tap { |s| s.slice!(diff.first) } if diff.size == 1
+  end
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    abcdef
+    bababc
+    abbcde
+    abcccd
+    aabcdd
+    abcdee
+    ababab
+  INPUT
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+  EXAMPLE2 = <<~INPUT
+    abcde
+    fghij
+    klmno
+    pqrst
+    fguij
+    axcye
+    wvxyz
+  INPUT
+
+  def test_solve_example
+    assert_equal 12, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 6972, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 'fgij', solve2(EXAMPLE2)
+  end
+
+  def test_solve2_input
+    assert_equal 'aixwcbzrmdvpsjfgllthdyoqe', solve2(read_file('input.txt'))
+  end
+end
