@@ -1,45 +1,47 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename).split("\n").map do |line|
-    first_range, second_range = line.split(',').map { |it| to_range(it.strip) }
-    sorted = [first_range, second_range].sort_by(&:size)
-    short = sorted.first
-    long = sorted.last
-    (short.first >= long.first) && (short.last <= long.last) ? 1 : 0
-  end.sum
+def pairs(input)
+  input.split("\n").map { |line| line.scan(/\d+/).map(&:to_i) }
 end
 
-def to_range(range)
-  start, last = range.split('-').map(&:to_i)
-  start..last
+def solve(input)
+  pairs(input).count { |a1, a2, b1, b2| (a1 <= b1 && b2 <= a2) || (b1 <= a1 && a2 <= b2) }
 end
 
-def solve2(filename)
-  read_file(filename).split("\n").map do |line|
-    first_range, second_range = line.split(',').map { |it| to_range(it.strip) }
-    sorted = [first_range, second_range].sort_by(&:size)
-    short = sorted.first
-    long = sorted.last
-    short.to_a.any? { |it| long.include? it } ? 1 : 0
-  end.sum
+def solve2(input)
+  pairs(input).count { |a1, a2, b1, b2| a1 <= b2 && b1 <= a2 }
 end
 
-compare_solutions(2, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    2-4,6-8
+    2-3,4-5
+    5-7,7-9
+    2-8,3-7
+    6-6,4-6
+    2-6,4-8
+  INPUT
 
-compare_solutions(4, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+  def test_solve_example
+    assert_equal 2, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 599, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 4, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 928, solve2(read_file('input.txt'))
+  end
+end
