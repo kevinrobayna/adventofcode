@@ -1,30 +1,48 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def dragon(a, length)
+  a = "#{a}0#{a.reverse.tr('01', '10')}" while a.size < length
+  a[0, length]
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+# Each checksum char covers a chunk of 2^k chars; pairwise XNOR-reduction of a chunk is '1' iff it has an even count of 1s.
+def checksum(data)
+  chunk = 1
+  chunk *= 2 while (data.size / chunk).even?
+  (0...data.size).step(chunk).map { |i| data[i, chunk].count('1').even? ? '1' : '0' }.join
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve(input, length: 272)
+  checksum(dragon(input.strip, length))
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+def solve2(input)
+  solve(input, length: 35_651_584)
+end
+
+class AoCTest < Minitest::Test
+  def test_solve_example
+    assert_equal '1111000010100101011110000', dragon('111100001010', 25)
+    assert_equal '100', checksum('110010110100')
+    assert_equal '01100', solve('10000', length: 20)
+  end
+
+  def test_solve_input
+    assert_equal '10010110010011110', solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal '01100', checksum(dragon('10000', 20))
+  end
+
+  def test_solve2_input
+    assert_equal '01101011101100011', solve2(read_file('input.txt'))
+  end
+end
