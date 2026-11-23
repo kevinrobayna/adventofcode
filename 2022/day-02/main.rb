@@ -1,15 +1,9 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
@@ -22,14 +16,9 @@ LOSE = 0
 DRAW = 3
 
 TRANSLATION = {
-  'A' => 0,
-  'X' => 0,
-
-  'B' => 1,
-  'Y' => 1,
-
-  'C' => 2,
-  'Z' => 2
+  'A' => 0, 'X' => 0,
+  'B' => 1, 'Y' => 1,
+  'C' => 2, 'Z' => 2
 }.freeze
 
 POINTS = [
@@ -38,43 +27,48 @@ POINTS = [
   [WIN, LOSE, DRAW]
 ].freeze
 
-def solve(filename)
-  hands = read_file(filename).split("\n").map do |line|
-    opponent, yours = line.split(' ')
+CHEAT = [
+  # ROCK PAPER SCISSORS
+  [SCISSORS, ROCK, PAPER], # LOSE
+  [ROCK, PAPER, SCISSORS], # DRAW
+  [PAPER, SCISSORS, ROCK] # WIN
+].freeze
 
-    opponent = TRANSLATION[opponent]
-    yours = TRANSLATION[yours]
+def rounds(input)
+  input.split("\n").map { |line| line.split.map { |c| TRANSLATION[c] } }
+end
 
+def solve(input)
+  rounds(input).sum { |opponent, yours| POINTS[opponent][yours] + yours + 1 }
+end
+
+def solve2(input)
+  rounds(input).sum do |opponent, outcome|
+    yours = CHEAT[outcome][opponent]
     POINTS[opponent][yours] + yours + 1
   end
-
-  hands.sum
 end
 
-def solve2(filename)
-  cheat = [
-    # ROCK PAPER SCISSORS
-    [SCISSORS, ROCK, PAPER], # LOSE
-    [ROCK, PAPER, SCISSORS], # DRAW
-    [PAPER, SCISSORS, ROCK] # WIN
-  ]
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    A Y
+    B X
+    C Z
+  INPUT
 
-  hands = read_file(filename).split("\n").map do |line|
-    opponent, yours = line.split(' ')
-
-    opponent = TRANSLATION[opponent]
-    yours = TRANSLATION[yours]
-
-    cheat_yours = cheat[yours][opponent]
-
-    POINTS[opponent][cheat_yours] + cheat_yours + 1
+  def test_solve_example
+    assert_equal 15, solve(EXAMPLE)
   end
 
-  hands.sum
+  def test_solve_input
+    assert_equal 15_632, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 12, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 14_416, solve2(read_file('input.txt'))
+  end
 end
-
-compare_solutions(15, solve('test.txt'))
-puts 'Part1', solve('input.txt')
-
-compare_solutions(12, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
