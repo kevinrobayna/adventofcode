@@ -1,30 +1,75 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+TICKS = 1000
+
+Particle = Struct.new(:id, :p, :v, :a) do
+  def tick
+    3.times do |i|
+      v[i] += a[i]
+      p[i] += v[i]
+    end
+  end
+
+  def distance = p.sum(&:abs)
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def parse_particles(input)
+  input.lines.each_with_index.map do |line, i|
+    nums = line.scan(/-?\d+/).map(&:to_i)
+    Particle.new(i, nums[0, 3], nums[3, 3], nums[6, 3])
+  end
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+# Long-run closest: smallest acceleration, then velocity, then position (ties broken by simulating).
+def solve(input, ticks: TICKS)
+  particles = parse_particles(input)
+  ticks.times { particles.each(&:tick) }
+  particles.min_by { |pt| [pt.a.sum(&:abs), pt.distance] }.id
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+def solve2(input, ticks: TICKS)
+  particles = parse_particles(input)
+  ticks.times do
+    particles.each(&:tick)
+    collided = particles.group_by(&:p).values.select { |g| g.size > 1 }.flatten
+    particles -= collided
+  end
+  particles.size
+end
+
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    p=< 3,0,0>, v=< 2,0,0>, a=<-1,0,0>
+    p=< 4,0,0>, v=< 0,0,0>, a=<-2,0,0>
+  INPUT
+
+  EXAMPLE2 = <<~INPUT
+    p=<-6,0,0>, v=< 3,0,0>, a=< 0,0,0>
+    p=<-4,0,0>, v=< 2,0,0>, a=< 0,0,0>
+    p=<-2,0,0>, v=< 1,0,0>, a=< 0,0,0>
+    p=< 3,0,0>, v=<-1,0,0>, a=< 0,0,0>
+  INPUT
+
+  def test_solve_example
+    assert_equal 0, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 308, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 1, solve2(EXAMPLE2)
+  end
+
+  def test_solve2_input
+    assert_equal 504, solve2(read_file('input.txt'))
+  end
+end
