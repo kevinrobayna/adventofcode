@@ -1,30 +1,72 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def parse_moves(input)
+  input.strip.split(',').map do |m|
+    args = m[1..].split('/')
+    case m[0]
+    when 's' then [:spin, m[1..].to_i]
+    when 'x' then [:exchange, *args.map(&:to_i)]
+    else [:partner, *args]
+    end
+  end
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def dance(programs, moves)
+  p = programs.dup
+  moves.each do |op, a, b|
+    case op
+    when :spin then p = p[-a..] + p[0...-a]
+    when :exchange then p[a], p[b] = p[b], p[a]
+    else
+      i = p.index(a)
+      j = p.index(b)
+      p[i] = b
+      p[j] = a
+    end
+  end
+  p
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve(input, programs: 'abcdefghijklmnop')
+  dance(programs, parse_moves(input))
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+def solve2(input, programs: 'abcdefghijklmnop', times: 1_000_000_000)
+  moves = parse_moves(input)
+  seen = [programs]
+  current = programs
+  loop do
+    current = dance(current, moves)
+    break if current == programs
+
+    seen << current
+  end
+  seen[times % seen.size]
+end
+
+class AoCTest < Minitest::Test
+  EXAMPLE = 's1,x3/4,pe/b'
+
+  def test_solve_example
+    assert_equal 'baedc', solve(EXAMPLE, programs: 'abcde')
+  end
+
+  def test_solve_input
+    assert_equal 'padheomkgjfnblic', solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 'ceadb', solve2(EXAMPLE, programs: 'abcde', times: 2)
+  end
+
+  def test_solve2_input
+    assert_equal 'bfcdeakhijmlgopn', solve2(read_file('input.txt'))
+  end
+end
