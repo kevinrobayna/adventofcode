@@ -1,30 +1,65 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
+require 'digest'
 
-def solve(filename)
-  read_file(filename)
-  0
+DIRS = [['U', 0, -1], ['D', 0, 1], ['L', -1, 0], ['R', 1, 0]].freeze
+
+# Yields every path reaching the vault (3,3), in BFS order (shortest first).
+def vault_paths(passcode)
+  return enum_for(:vault_paths, passcode) unless block_given?
+
+  frontier = [['', 0, 0]]
+  until frontier.empty?
+    frontier = frontier.flat_map do |path, x, y|
+      hash = Digest::MD5.hexdigest(passcode + path)
+      DIRS.each_with_index.filter_map do |(d, dx, dy), i|
+        nx = x + dx
+        ny = y + dy
+        next unless nx.between?(0, 3) && ny.between?(0, 3) && 'bcdef'.include?(hash[i])
+
+        if nx == 3 && ny == 3
+          yield path + d
+          next
+        end
+
+        [path + d, nx, ny]
+      end
+    end
+  end
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def solve(input)
+  vault_paths(input.strip).first
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve2(input)
+  vault_paths(input.strip).map(&:size).max
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+class AoCTest < Minitest::Test
+  def test_solve_example
+    assert_equal 'DDRRRD', solve('ihgpwlah')
+    assert_equal 'DDUDRLRRUDRD', solve('kglvqrro')
+    assert_equal 'DRURDRUDDLLDLUURRDULRLDUUDDDRR', solve('ulqzkmiv')
+  end
+
+  def test_solve_input
+    assert_equal 'DDRRULRDRD', solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 370, solve2('ihgpwlah')
+    assert_equal 492, solve2('kglvqrro')
+    assert_equal 830, solve2('ulqzkmiv')
+  end
+
+  def test_solve2_input
+    assert_equal 536, solve2(read_file('input.txt'))
+  end
+end
