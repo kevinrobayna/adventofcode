@@ -7,8 +7,11 @@ def read_file(filename)
   File.read(File.join(__dir__, filename))
 end
 
+# Memoized run -> "countdigit"; a hash replacement avoids a block call per run.
+RUNS = Hash.new { |cache, run| cache[run] = "#{run.length}#{run[0]}" }
+
 def look_and_say(digits)
-  digits.gsub(/(\d)\1*/) { |run| "#{run.length}#{run[0]}" }
+  digits.gsub(/(\d)\1*/, RUNS)
 end
 
 def look_and_say_length(input, times)
@@ -30,6 +33,7 @@ class AoCTest < Minitest::Test
     assert_equal '1211', look_and_say('21')
     assert_equal '111221', look_and_say('1211')
     assert_equal '312211', look_and_say('111221')
+    assert_equal '4115', look_and_say('11115')
     assert_equal 6, look_and_say_length('1', 5)
   end
 
