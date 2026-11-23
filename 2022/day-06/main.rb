@@ -1,46 +1,49 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  find_position_with_n_unique_chars(4, read_file(filename))
+def solve(input)
+  marker_position(input.strip, 4)
 end
 
-def solve2(filename)
-  find_position_with_n_unique_chars(14, read_file(filename))
+def solve2(input)
+  marker_position(input.strip, 14)
 end
 
-def find_position_with_n_unique_chars(number_of_unique_chars, content)
-  content.chars.each_index do |index|
-    next if index < number_of_unique_chars
-
-    sequence = content[(index - number_of_unique_chars)...index]
-    return index if sequence.chars.uniq.length == number_of_unique_chars
+def marker_position(content, size)
+  content.chars.each_cons(size).with_index do |window, inx|
+    return inx + size if window.uniq.size == size
   end
   raise 'No solution found'
 end
 
-compare_solutions(7, solve('test.txt'))
-compare_solutions(5, solve('test2.txt'))
-compare_solutions(6, solve('test3.txt'))
-compare_solutions(10, solve('test4.txt'))
-compare_solutions(11, solve('test5.txt'))
-puts 'Part1', solve('input.txt')
+class AoCTest < Minitest::Test
+  EXAMPLES = {
+    'mjqjpqmgbljsphdztnvjfqwrcgsmlb' => [7, 19],
+    'bvwbjplbgvbhsrlpgdmjqwftvncz' => [5, 23],
+    'nppdvjthqldpwncqszvftbrmjlhg' => [6, 23],
+    'nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg' => [10, 29],
+    'zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw' => [11, 26]
+  }.freeze
 
-compare_solutions(19, solve2('test.txt'))
-compare_solutions(23, solve2('test2.txt'))
-compare_solutions(23, solve2('test3.txt'))
-compare_solutions(29, solve2('test4.txt'))
-compare_solutions(26, solve2('test5.txt'))
-puts 'Part2', solve2('input.txt')
+  def test_solve_example
+    EXAMPLES.each { |input, (expected, _)| assert_equal expected, solve(input) }
+  end
+
+  def test_solve_input
+    assert_equal 1542, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    EXAMPLES.each { |input, (_, expected)| assert_equal expected, solve2(input) }
+  end
+
+  def test_solve2_input
+    assert_equal 3153, solve2(read_file('input.txt'))
+  end
+end
