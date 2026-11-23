@@ -1,30 +1,45 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
+require_relative '../ocr'
 
-def solve(filename)
-  read_file(filename)
-  0
+def layers(input, width, height)
+  input.strip.chars.each_slice(width * height).to_a
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def solve(input, width: 25, height: 6)
+  layer = layers(input, width, height).min_by { it.count('0') }
+  layer.count('1') * layer.count('2')
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def render(input, width: 25, height: 6)
+  layers(input, width, height).transpose.map { |px| px.find { it != '2' } == '1' ? '#' : '.' }
+                              .each_slice(width).map(&:join)
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+def solve2(input)
+  OCR.decode(render(input))
+end
+
+class AoCTest < Minitest::Test
+  def test_solve_example
+    assert_equal 1, solve('123456789012', width: 3, height: 2)
+  end
+
+  def test_solve_input
+    assert_equal 1320, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal %w[.# #.], render('0222112222120000', width: 2, height: 2)
+  end
+
+  def test_solve2_input
+    assert_equal 'RCYKR', solve2(read_file('input.txt'))
+  end
+end
