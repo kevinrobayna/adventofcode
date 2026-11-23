@@ -1,30 +1,54 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+# Sorted, merged list of blocked [low, high] ranges.
+def merged_ranges(input)
+  ranges = input.scan(/(\d+)-(\d+)/).map { |a, b| [a.to_i, b.to_i] }.sort
+  ranges.each_with_object([]) do |(lo, hi), merged|
+    if merged.any? && lo <= merged.last[1] + 1
+      merged.last[1] = [merged.last[1], hi].max
+    else
+      merged << [lo, hi]
+    end
+  end
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def solve(input)
+  first = merged_ranges(input).first
+  first[0].positive? ? 0 : first[1] + 1
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve2(input, max: 4_294_967_295)
+  blocked = merged_ranges(input).sum { |lo, hi| [hi, max].min - lo + 1 if lo <= max }
+  max + 1 - blocked
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    5-8
+    0-2
+    4-7
+  INPUT
+
+  def test_solve_example
+    assert_equal 3, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 23_923_783, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 2, solve2(EXAMPLE, max: 9)
+  end
+
+  def test_solve2_input
+    assert_equal 125, solve2(read_file('input.txt'))
+  end
+end
