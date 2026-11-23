@@ -1,30 +1,63 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def parents(input)
+  input.split.to_h { it.split(')').reverse }
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def ancestors(parents, node)
+  path = []
+  path << node while (node = parents[node])
+  path
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve(input)
+  map = parents(input)
+  map.keys.sum { ancestors(map, it).size }
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+def solve2(input)
+  map = parents(input)
+  you = ancestors(map, 'YOU')
+  san = ancestors(map, 'SAN')
+  common = (you & san).first
+  you.index(common) + san.index(common)
+end
+
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    COM)B
+    B)C
+    C)D
+    D)E
+    E)F
+    B)G
+    G)H
+    D)I
+    E)J
+    J)K
+    K)L
+  INPUT
+
+  def test_solve_example
+    assert_equal 42, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 417_916, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 4, solve2(EXAMPLE + "K)YOU\nI)SAN\n")
+  end
+
+  def test_solve2_input
+    assert_equal 523, solve2(read_file('input.txt'))
+  end
+end
