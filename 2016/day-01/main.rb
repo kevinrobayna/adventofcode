@@ -1,30 +1,53 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def walk(input)
+  pos = Complex(0, 0)
+  dir = Complex(0, 1)
+  path = []
+  input.strip.split(', ').each do |step|
+    dir *= step[0] == 'R' ? Complex(0, -1) : Complex(0, 1)
+    step[1..].to_i.times do
+      pos += dir
+      path << pos
+    end
+  end
+  path
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def distance(pos) = pos.real.abs + pos.imaginary.abs
+
+def solve(input)
+  distance(walk(input).last)
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve2(input)
+  seen = Set.new
+  distance(walk(input).find { |pos| !seen.add?(pos) })
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+class AoCTest < Minitest::Test
+  def test_solve_example
+    assert_equal 5, solve('R2, L3')
+    assert_equal 2, solve('R2, R2, R2')
+    assert_equal 12, solve('R5, L5, R5, R3')
+  end
+
+  def test_solve_input
+    assert_equal 230, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 4, solve2('R8, R4, R4, R8')
+  end
+
+  def test_solve2_input
+    assert_equal 154, solve2(read_file('input.txt'))
+  end
+end
