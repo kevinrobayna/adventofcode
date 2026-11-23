@@ -1,30 +1,80 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def parse(input)
+  input.lines.map do |l|
+    op, arg = l.split
+    [op, arg.to_i]
+  end
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+# Returns [terminated?, acc]
+def run_program(program)
+  acc = 0
+  pc = 0
+  seen = Set.new
+  while pc < program.size
+    return [false, acc] unless seen.add?(pc)
+
+    op, arg = program[pc]
+    case op
+    when 'acc' then acc += arg
+    when 'jmp' then pc += arg - 1
+    end
+    pc += 1
+  end
+  [true, acc]
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve(input)
+  run_program(parse(input))[1]
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+def solve2(input)
+  program = parse(input)
+  program.each_index do |i|
+    op, arg = program[i]
+    next if op == 'acc'
+
+    patched = program.dup
+    patched[i] = [op == 'jmp' ? 'nop' : 'jmp', arg]
+    done, acc = run_program(patched)
+    return acc if done
+  end
+end
+
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    nop +0
+    acc +1
+    jmp +4
+    acc +3
+    jmp -3
+    acc -99
+    acc +1
+    jmp -4
+    acc +6
+  INPUT
+
+  def test_solve_example
+    assert_equal 5, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 1814, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 8, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 1056, solve2(read_file('input.txt'))
+  end
+end
