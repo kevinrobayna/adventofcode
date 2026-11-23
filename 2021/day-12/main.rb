@@ -1,30 +1,107 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def parse(input)
+  graph = Hash.new { |h, k| h[k] = [] }
+  input.split("\n").each do |line|
+    a, b = line.split('-')
+    graph[a] << b unless b == 'start'
+    graph[b] << a unless a == 'start'
+  end
+  graph
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def count_paths(graph, cave, visited, twice_allowed)
+  return 1 if cave == 'end'
+
+  graph[cave].sum do |nxt|
+    small = nxt == nxt.downcase
+    if !small || !visited.include?(nxt)
+      count_paths(graph, nxt, small ? visited + [nxt] : visited, twice_allowed)
+    elsif twice_allowed
+      count_paths(graph, nxt, visited, false)
+    else
+      0
+    end
+  end
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve(input)
+  count_paths(parse(input), 'start', ['start'], false)
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+def solve2(input)
+  count_paths(parse(input), 'start', ['start'], true)
+end
+
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    start-A
+    start-b
+    A-c
+    A-b
+    b-d
+    A-end
+    b-end
+  INPUT
+
+  EXAMPLE2 = <<~INPUT
+    dc-end
+    HN-start
+    start-kj
+    dc-start
+    dc-HN
+    LN-dc
+    HN-end
+    kj-sa
+    kj-HN
+    kj-dc
+  INPUT
+
+  EXAMPLE3 = <<~INPUT
+    fs-end
+    he-DX
+    fs-he
+    start-DX
+    pj-DX
+    end-zg
+    zg-sl
+    zg-pj
+    pj-he
+    RW-he
+    fs-DX
+    pj-RW
+    zg-RW
+    start-pj
+    he-WI
+    zg-he
+    pj-fs
+    start-RW
+  INPUT
+
+  def test_solve_example
+    assert_equal 10, solve(EXAMPLE)
+    assert_equal 19, solve(EXAMPLE2)
+    assert_equal 226, solve(EXAMPLE3)
+  end
+
+  def test_solve_input
+    assert_equal 4411, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 36, solve2(EXAMPLE)
+    assert_equal 103, solve2(EXAMPLE2)
+    assert_equal 3509, solve2(EXAMPLE3)
+  end
+
+  def test_solve2_input
+    assert_equal 136_767, solve2(read_file('input.txt'))
+  end
+end
