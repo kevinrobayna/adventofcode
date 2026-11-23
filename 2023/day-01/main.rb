@@ -1,26 +1,10 @@
 # frozen_string_literal: true
 
-require 'pry'
 require 'minitest/autorun'
 
-class Object
-  def number?
-    to_f.to_s == to_s || to_i.to_s == to_s
-  end
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
-end
-
-def solve(filename)
-  read_file(filename).each_line.map do |line|
-    numbers = line.chars.select(&:number?)
-    "#{numbers.first}#{numbers.last}".to_i
-  end.sum
 end
 
 NUMBERS_MAP = {
@@ -35,8 +19,15 @@ NUMBERS_MAP = {
   nine: 9
 }.freeze
 
-def solve2(filename)
-  read_file(filename).each_line.map do |line|
+def solve(input)
+  input.each_line.sum do |line|
+    numbers = line.chars.grep(/\d/)
+    "#{numbers.first}#{numbers.last}".to_i
+  end
+end
+
+def solve2(input)
+  input.each_line.sum do |line|
     line = line.delete("\n")
     parsed_line = []
     head = 0
@@ -52,26 +43,42 @@ def solve2(filename)
         end
       end
     end
-    result = "#{parsed_line.first}#{parsed_line.last}".to_i
-
-    # puts "line: #{line.gsub("\n", '')}, numbers: #{parsed_line} result: #{result}"
-    result
-  end.sum
+    "#{parsed_line.first}#{parsed_line.last}".to_i
+  end
 end
 
 class AoCTest < Minitest::Test
-  def test_solve
-    assert solve('test.txt') == 142
+  EXAMPLE = <<~INPUT
+    1abc2
+    pqr3stu8vwx
+    a1b2c3d4e5f
+    treb7uchet
+  INPUT
+
+  EXAMPLE2 = <<~INPUT
+    two1nine
+    eightwothree
+    abcone2threexyz
+    xtwone3four
+    4nineeightseven2
+    zoneight234
+    7pqrstsixteen
+  INPUT
+
+  def test_solve_example
+    assert_equal 142, solve(EXAMPLE)
   end
 
-  def test_solve2
-    assert solve2('test.txt') == 142
+  def test_solve_input
+    assert_equal 54_951, solve(read_file('input.txt'))
   end
 
-  def test_solve2_with_different_input
-    assert solve2('test2.txt') == 281
+  def test_solve2_example
+    assert_equal 142, solve2(EXAMPLE)
+    assert_equal 281, solve2(EXAMPLE2)
+  end
+
+  def test_solve2_input
+    assert_equal 55_218, solve2(read_file('input.txt'))
   end
 end
-
-puts 'Part1', solve('input.txt')
-puts 'Part2', solve2('input.txt')
