@@ -1,18 +1,9 @@
 # frozen_string_literal: true
 
-require 'pry'
-require 'colorize'
+require 'minitest/autorun'
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
-
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
@@ -32,110 +23,134 @@ DIR = {
   'S' => []
 }.freeze
 
-def solve(filename)
-  start, grid = parse_file(filename)
-
-  find_cycle(grid, start).length / 2
+def parse(input)
+  grid = input.lines.map { it.strip.chars }
+  x = grid.index { it.include?('S') }
+  [[x, grid[x].index('S')], grid]
 end
 
-def solve2(filename)
-  start, grid = parse_file(filename)
+def neighbors(current, grid)
+  x, y = current
+  return [] if x.negative? || y.negative? || x >= grid.length || y >= grid.first.length
 
-  cycle = find_cycle(grid, start)
-
-  clean_grid = Array.new(grid.length) { Array.new(grid.first.size, '.') }
-  cycle.each do |x, y|
-    clean_grid[x][y] = grid[x][y]
-  end
-
-  inside_cells = []
-  inside = 0
-  clean_grid.each_with_index do |row, x|
-    row.each_with_index do |_cell, y|
-      next if cycle.include?([x, y])
-
-      north = 0
-      south = 0
-
-      # https://en.wikipedia.org/wiki/Point_in_polygon
-      (y..row.size).each do |y2|
-        # Count north facing blockers
-        north += 1 if ['J', 'L', '|'].include?(clean_grid[x][y2])
-
-        # Count south facing blockers
-        south += 1 if ['F', '7', '|'].include?(clean_grid[x][y2])
-      end
-      if [north, south].min.odd?
-        inside += 1
-        inside_cells << [x, y]
-      end
-    end
-  end
-
-  puts debug_board(clean_grid, cycle, inside_cells)
-  inside
-end
-
-def parse_file(filename)
-  start = []
-  grid = read_file(filename).each_line.with_index.map do |line, row|
-    chars = line.strip.chars
-    start = [row, chars.index('S')] if chars.include?('S')
-    chars
-  end
-
-  [start, grid]
+  DIR[grid[x][y]].map { |inc_x, inc_y| [x + inc_x, y + inc_y] }
 end
 
 def find_cycle(grid, start)
-  start_neighbors = [UP, DOWN, LEFT, RIGHT].map do |dx, dy|
-    [start.first + dx, start.last + dy]
-  end.select do |pos|
-    neighbors(pos, grid).include?(start)
-  end
+  start_neighbors = [UP, DOWN, LEFT, RIGHT].map { |dx, dy| [start.first + dx, start.last + dy] }
+                                           .select { |pos| neighbors(pos, grid).include?(start) }
 
-  start_point = start_neighbors.first
-  pipe = [start, start_point].to_set
-  while start_point != start_neighbors.last
-    neighbors(start_point, grid).each do |neighbor|
-      unless pipe.include?(neighbor)
-        pipe << neighbor
-        start_point = neighbor
-      end
+  current = start_neighbors.first
+  pipe = Set[start, current]
+  while current != start_neighbors.last
+    neighbors(current, grid).each do |neighbor|
+      next if pipe.include?(neighbor)
+
+      pipe << neighbor
+      current = neighbor
     end
   end
   pipe
 end
 
-def neighbors(current, grid)
-  x, y = current
-  DIR[grid[x][y]].map { |inc_x, inc_y| [x + inc_x, y + inc_y] }
+def solve(input)
+  start, grid = parse(input)
+  find_cycle(grid, start).length / 2
 end
 
-def debug_board(board, path, inside = [])
-  board.each_with_index.map do |row, inx_x|
-    row.each_with_index.map do |v, inx_y|
-      if path.include?([inx_x, inx_y])
-        v.green
-      elsif inside.include?([inx_x, inx_y])
-        'x'.yellow
-      else
-        v.red
-      end
+# https://en.wikipedia.org/wiki/Point_in_polygon : cast a ray to the right and count crossings,
+# separately for pipes facing north and south.
+def solve2(input)
+  start, grid = parse(input)
+  cycle = find_cycle(grid, start)
+
+  grid.each_with_index.sum do |row, x|
+    row.each_index.count do |y|
+      next false if cycle.include?([x, y])
+
+      crossings = (y...row.size).select { cycle.include?([x, it]) }.map { row[it] }
+      north = crossings.count { %w[J L |].include?(it) }
+      south = crossings.count { %w[F 7 |].include?(it) }
+      [north, south].min.odd?
     end
-  end.map(&:join).join("\n") + "\n" + "\n"
+  end
 end
 
-# Easy ones
-compare_solutions(4, solve('test.txt'))
-compare_solutions(8, solve('test3.txt'))
+class AoCTest < Minitest::Test
+  def test_solve_example
+    assert_equal 4, solve(<<~INPUT)
+      .....
+      .S-7.
+      .|.|.
+      .L-J.
+      .....
+    INPUT
+    assert_equal 4, solve(<<~INPUT)
+      -L|F7
+      7S-7|
+      L|7||
+      -L-J|
+      L|-JF
+    INPUT
+    assert_equal 8, solve(<<~INPUT)
+      ..F7.
+      .FJ|.
+      SJ.L7
+      |F--J
+      LJ...
+    INPUT
+    assert_equal 8, solve(<<~INPUT)
+      7-F7-
+      .FJ|7
+      SJLL7
+      |F--J
+      LJ.LJ
+    INPUT
+  end
 
-# Annoying ones
-compare_solutions(4, solve('test2.txt'))
-compare_solutions(8, solve('test4.txt'))
-puts 'Part1', solve('input.txt')
+  def test_solve_input
+    assert_equal 6778, solve(read_file('input.txt'))
+  end
 
-compare_solutions(4, solve2('test5.txt'))
-compare_solutions(8, solve2('test6.txt'))
-compare_solutions(10, solve2('test7.txt'))
-puts 'Part2', solve2('input.txt')
+  def test_solve2_example
+    assert_equal 4, solve2(<<~INPUT)
+      ...........
+      .S-------7.
+      .|F-----7|.
+      .||.....||.
+      .||.....||.
+      .|L-7.F-J|.
+      .|..|.|..|.
+      .L--J.L--J.
+      ...........
+    INPUT
+    assert_equal 8, solve2(<<~INPUT)
+      .F----7F7F7F7F-7....
+      .|F--7||||||||FJ....
+      .||.FJ||||||||L7....
+      FJL7L7LJLJ||LJ.L-7..
+      L--J.L7...LJS7F-7L7.
+      ....F-J..F7FJ|L7L7L7
+      ....L7.F7||L7|.L7L7|
+      .....|FJLJ|FJ|F7|.LJ
+      ....FJL-7.||.||||...
+      ....L---J.LJ.LJLJ...
+    INPUT
+    assert_equal 10, solve2(<<~INPUT)
+      FF7FSF7F7F7F7F7F---7
+      L|LJ||||||||||||F--J
+      FL-7LJLJ||||||LJL-77
+      F--JF--7||LJLJ7F7FJ-
+      L---JF-JLJ.||-FJLJJ7
+      |F|F-JF---7F7-L7L|7|
+      |FFJF7L7F-JF7|JL---7
+      7-L-JL7||F7|L7F-7F7|
+      L.L7LFJ|||||FJL7||LJ
+      L7JLJL-JLJLJL--JLJ.L
+    INPUT
+  end
+
+  def test_solve2_input
+    assert_equal 433, solve2(read_file('input.txt'))
+  end
+end
