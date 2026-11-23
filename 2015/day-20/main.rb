@@ -8,8 +8,21 @@ def read_file(filename)
 end
 
 # Sieve over house numbers; target / 10 is a safe upper bound since house n gets >= 10n presents.
-def first_house(target, per_elf:, max_visits: nil)
-  limit = target / per_elf
+# Sieves houses 1..limit, doubling the limit until one reaches the target. House counts
+# up to the limit are exact, and house target/per_elf always qualifies, so it terminates.
+# The starting limit only affects speed, never the result.
+def first_house(target, per_elf:, max_visits: nil, limit: target / per_elf / 40)
+  cap = target / per_elf
+  limit = limit.clamp(1, cap)
+  loop do
+    found = sieve(target, limit, per_elf, max_visits)
+    return found if found
+
+    limit = [limit * 2, cap].min
+  end
+end
+
+def sieve(target, limit, per_elf, max_visits)
   presents = Array.new(limit + 1, 0)
   (1..limit).each do |elf|
     last = max_visits ? [limit, elf * max_visits].min : limit
@@ -32,6 +45,11 @@ class AoCTest < Minitest::Test
     assert_equal 4, solve('70')
     assert_equal 6, solve('120')
     assert_equal 8, solve('150')
+  end
+
+  def test_first_house_grows_limit_until_found
+    assert_equal 8, first_house(150, per_elf: 10, limit: 1)
+    assert_equal 4, first_house(77, per_elf: 11, max_visits: 50, limit: 2)
   end
 
   def test_solve_input
