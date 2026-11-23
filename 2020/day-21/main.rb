@@ -1,30 +1,65 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def parse(input)
+  input.lines.map do |line|
+    ingredients, allergens = line.match(/(.*) \(contains (.*)\)/).captures
+    [ingredients.split, allergens.split(', ')]
+  end
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+# allergen => set of ingredients that could contain it
+def candidates(foods)
+  foods.each_with_object({}) do |(ingredients, allergens), acc|
+    allergens.each { |a| acc[a] = acc.key?(a) ? acc[a] & ingredients : ingredients }
+  end
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve(input)
+  foods = parse(input)
+  unsafe = candidates(foods).values.flatten.uniq
+  foods.sum { |ingredients, _| (ingredients - unsafe).size }
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+def solve2(input)
+  remaining = candidates(parse(input))
+  resolved = {}
+  until remaining.empty?
+    allergen, (ingredient,) = remaining.find { |_, ing| ing.size == 1 }
+    resolved[allergen] = ingredient
+    remaining.delete(allergen)
+    remaining.transform_values! { |ing| ing - [ingredient] }
+  end
+  resolved.sort.map(&:last).join(',')
+end
+
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    mxmxvkd kfcds sqjhc nhms (contains dairy, fish)
+    trh fvjkl sbzzf mxmxvkd (contains dairy)
+    sqjhc fvjkl (contains soy)
+    sqjhc mxmxvkd sbzzf (contains fish)
+  INPUT
+
+  def test_solve_example
+    assert_equal 5, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 2573, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 'mxmxvkd,sqjhc,fvjkl', solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 'bjpkhx,nsnqf,snhph,zmfqpn,qrbnjtj,dbhfd,thn,sthnsg', solve2(read_file('input.txt'))
+  end
+end
