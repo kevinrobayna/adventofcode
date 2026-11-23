@@ -1,30 +1,74 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def program(input)
+  mask = nil
+  input.lines.each do |line|
+    if line.start_with?('mask')
+      mask = line.split(' = ').last.strip
+    else
+      address, value = line.scan(/\d+/).map(&:to_i)
+      yield mask, address, value
+    end
+  end
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def solve(input)
+  memory = {}
+  program(input) do |mask, address, value|
+    memory[address] = (value | mask.tr('X', '0').to_i(2)) & mask.tr('X', '1').to_i(2)
+  end
+  memory.values.sum
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def addresses(mask, address)
+  floating = mask.chars.reverse.each_index.select { |i| mask[-1 - i] == 'X' }
+  base = (address | mask.tr('X', '0').to_i(2)) & ~floating.sum { |i| 1 << i }
+  (0..floating.size).flat_map { |n| floating.combination(n).map { |bits| base | bits.sum { |i| 1 << i } } }
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+def solve2(input)
+  memory = {}
+  program(input) do |mask, address, value|
+    addresses(mask, address).each { |a| memory[a] = value }
+  end
+  memory.values.sum
+end
+
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    mask = XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X
+    mem[8] = 11
+    mem[7] = 101
+    mem[8] = 0
+  INPUT
+
+  EXAMPLE2 = <<~INPUT
+    mask = 000000000000000000000000000000X1001X
+    mem[42] = 100
+    mask = 00000000000000000000000000000000X0XX
+    mem[26] = 1
+  INPUT
+
+  def test_solve_example
+    assert_equal 165, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 12_512_013_221_615, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 208, solve2(EXAMPLE2)
+  end
+
+  def test_solve2_input
+    assert_equal 3_905_642_473_893, solve2(read_file('input.txt'))
+  end
+end
