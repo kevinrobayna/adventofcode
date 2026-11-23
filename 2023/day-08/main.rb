@@ -1,73 +1,90 @@
 # frozen_string_literal: true
 
-require 'pry'
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  directions, nodes = parse_file(filename)
+def parse(input)
+  directions, *words = input.scan(/\w+/)
+  nodes = words.each_slice(3).to_h { |source, left, right| [source, { 'L' => left, 'R' => right }] }
+  [directions, nodes]
+end
+
+def steps(directions, nodes, node)
   count = 0
-  node = :AAA
-  head = 0
-
-  while node != :ZZZ
-    next_side = directions[head % directions.length]
-    node = nodes[node][next_side.to_sym].to_sym
-
+  until yield(node)
+    node = nodes[node][directions[count % directions.length]]
     count += 1
-    head += 1
   end
   count
 end
 
-def solve2(filename)
-  directions, nodes = parse_file(filename)
-  count = 0
-  head = 0
-  node_head = nodes.select { _1[2] == 'A' }.keys.sort
-  desired_end = nodes.select { _1[2] == 'Z' }.keys.sort
-  cycles = []
-
-  until node_head.empty?
-    next_side = directions[head % directions.length]
-    node_head = node_head.map { |node| nodes[node][next_side.to_sym].to_sym }.sort
-
-    count += 1
-    head += 1
-
-    node_head = node_head.reject do |node|
-      cycles << count if desired_end.include?(node)
-
-      desired_end.include?(node)
-    end
-  end
-
-  cycles.reduce(1) { |acc, cycle| acc.lcm(cycle) }
+def solve(input)
+  directions, nodes = parse(input)
+  steps(directions, nodes, 'AAA') { it == 'ZZZ' }
 end
 
-def parse_file(filename)
-  directions, *lines = read_file(filename).scan(/\w+/)
-  nodes = lines.each_slice(3).reduce({}) do |acc, (source, left, right)|
-    acc.merge(source.to_sym => { L: left, R: right })
-  end
-  [directions, nodes]
+# Each ghost reaches a Z node on a cycle, so the answer is the LCM of the first arrival times.
+def solve2(input)
+  directions, nodes = parse(input)
+  nodes.keys.select { it.end_with?('A') }
+       .map { |start| steps(directions, nodes, start) { it.end_with?('Z') } }
+       .reduce(1, :lcm)
 end
 
-compare_solutions(2, solve('test.txt'))
-compare_solutions(6, solve('test2.txt'))
-puts 'Part1', solve('input.txt')
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    RL
 
-compare_solutions(2, solve2('test.txt'))
-compare_solutions(6, solve2('test2.txt'))
-compare_solutions(6, solve2('test3.txt'))
-puts 'Part2', solve2('input.txt')
+    AAA = (BBB, CCC)
+    BBB = (DDD, EEE)
+    CCC = (ZZZ, GGG)
+    DDD = (DDD, DDD)
+    EEE = (EEE, EEE)
+    GGG = (GGG, GGG)
+    ZZZ = (ZZZ, ZZZ)
+  INPUT
+
+  EXAMPLE2 = <<~INPUT
+    LLR
+
+    AAA = (BBB, BBB)
+    BBB = (AAA, ZZZ)
+    ZZZ = (ZZZ, ZZZ)
+  INPUT
+
+  EXAMPLE3 = <<~INPUT
+    LR
+
+    11A = (11B, XXX)
+    11B = (XXX, 11Z)
+    11Z = (11B, XXX)
+    22A = (22B, XXX)
+    22B = (22C, 22C)
+    22C = (22Z, 22Z)
+    22Z = (22B, 22B)
+    XXX = (XXX, XXX)
+  INPUT
+
+  def test_solve_example
+    assert_equal 2, solve(EXAMPLE)
+    assert_equal 6, solve(EXAMPLE2)
+  end
+
+  def test_solve_input
+    assert_equal 16_409, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 2, solve2(EXAMPLE)
+    assert_equal 6, solve2(EXAMPLE2)
+    assert_equal 6, solve2(EXAMPLE3)
+  end
+
+  def test_solve2_input
+    assert_equal 11_795_205_644_011, solve2(read_file('input.txt'))
+  end
+end
