@@ -1,30 +1,71 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+# Returns [supernet parts, hypernet parts].
+def split_address(line)
+  parts = line.split(/[\[\]]/)
+  [parts.each_slice(2).map(&:first), parts.each_slice(2).filter_map { |s| s[1] }]
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def abba?(s) = s.chars.each_cons(4).any? { |a, b, c, d| a == d && b == c && a != b }
+
+def abas(s) = s.chars.each_cons(3).select { |a, b, c| a == c && a != b }
+
+def tls?(line)
+  outside, inside = split_address(line)
+  outside.any? { |s| abba?(s) } && inside.none? { |s| abba?(s) }
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def ssl?(line)
+  outside, inside = split_address(line)
+  babs = outside.flat_map { |s| abas(s) }.map { |a, b, _| "#{b}#{a}#{b}" }
+  babs.any? { |bab| inside.any? { |s| s.include?(bab) } }
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+def addresses(input) = input.lines.map(&:strip).reject(&:empty?)
+
+def solve(input)
+  addresses(input).count { |l| tls?(l) }
+end
+
+def solve2(input)
+  addresses(input).count { |l| ssl?(l) }
+end
+
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    abba[mnop]qrst
+    abcd[bddb]xyyx
+    aaaa[qwer]tyui
+    ioxxoj[asdfgh]zxcvbn
+  INPUT
+
+  EXAMPLE2 = <<~INPUT
+    aba[bab]xyz
+    xyx[xyx]xyx
+    aaa[kek]eke
+    zazbz[bzb]cdb
+  INPUT
+
+  def test_solve_example
+    assert_equal 2, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 118, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 3, solve2(EXAMPLE2)
+  end
+
+  def test_solve2_input
+    assert_equal 260, solve2(read_file('input.txt'))
+  end
+end
