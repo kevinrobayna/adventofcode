@@ -1,58 +1,42 @@
 # frozen_string_literal: true
 
-require 'pry'
 require 'minitest/autorun'
 
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  regex = /mul\((\d+),(\d+)\)/
-  read_file(filename).scan(regex).reduce(0) do |acc, (a, b)|
-    acc += a.to_i * b.to_i
-    acc
-  end
+def solve(input)
+  input.scan(/mul\((\d+),(\d+)\)/).sum { |a, b| a.to_i * b.to_i }
 end
 
-def solve2(filename)
-  regex = /(mul\((\d+),(\d+)\)|do\(\)|don't\(\))/
-  matches = read_file(filename).scan(regex)
-
-  found_don_t = false
-  filtered_matches = matches.map do |match, f, s|
-    if match == 'do()'
-      found_don_t = false
-      [match, 0]
-    elsif match == "don't()"
-      found_don_t = true
-      [match, 0]
-    elsif match.start_with?('mul')
-      if found_don_t
-        [match, 0]
-      else
-        [match, f.to_i * s.to_i]
-      end
-    else
-      raise "Unknown match: #{match}"
-    end
+def solve2(input)
+  enabled = true
+  input.scan(/(mul\((\d+),(\d+)\)|do\(\)|don't\(\))/).sum do |match, a, b|
+    enabled = true if match == 'do()'
+    enabled = false if match == "don't()"
+    match.start_with?('mul') && enabled ? a.to_i * b.to_i : 0
   end
-
-  filtered_matches.sum { |(_, b)| b }
 end
 
 class AoCTest < Minitest::Test
-  def test_solve
-    assert_equal 161, solve('test.txt')
+  EXAMPLE = "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))\n"
+  EXAMPLE2 = "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))\n"
+
+  def test_solve_example
+    assert_equal 161, solve(EXAMPLE)
   end
 
-  def test_solve2
-    assert_equal 48, solve2('test.txt')
+  def test_solve_input
+    assert_equal 173_517_243, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 48, solve2(EXAMPLE2)
+  end
+
+  def test_solve2_input
+    assert_equal 100_450_138, solve2(read_file('input.txt'))
   end
 end
-
-puts 'Part1', solve('input.txt')
-puts 'Part2', solve2('input.txt')
