@@ -1,68 +1,71 @@
 # frozen_string_literal: true
 
-require 'pry'
+require 'minitest/autorun'
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
-
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  parse_input(filename).sum do |pattern|
-    n_columns = find_matching(pattern)
-    n_rows = find_matching(pattern.transpose)
-    n_rows.first.to_i * 100 + n_columns.first.to_i
+def parse(input)
+  input.split("\n\n").map { |block| block.lines.map { it.strip.chars } }
+end
+
+# Index of the row above which the pattern mirrors with exactly `smudges` differing cells (0 if none).
+def mirror_row(pattern, smudges)
+  (1...pattern.length).find do |row|
+    above = pattern[0...row].reverse
+    below = pattern[row..]
+    above.zip(below).sum { |a, b| b ? a.zip(b).count { |x, y| x != y } : 0 } == smudges
+  end || 0
+end
+
+def summarize(input, smudges)
+  parse(input).sum do |pattern|
+    (100 * mirror_row(pattern, smudges)) + mirror_row(pattern.transpose, smudges)
   end
 end
 
-def solve2(filename)
-  parse_input(filename).sum do |pattern|
-    n_columns = find_matching(pattern)
-    n_rows = find_matching(pattern.transpose)
+def solve(input)
+  summarize(input, 0)
+end
 
-    columns = Set.new
-    rows = Set.new
-    pattern.each_with_index do |line, inx_x|
-      line.each_with_index do |char, inx_y|
-        pattern_x = pattern.map(&:dup)
-        pattern_x[inx_x][inx_y] = char == '#' ? '.' : '#'
-        columns += find_matching(pattern_x)
-        rows += find_matching(pattern_x.transpose)
-      end
-    end
+def solve2(input)
+  summarize(input, 1)
+end
 
-    columns -= n_columns
-    rows -= n_rows
-    rows.first.to_i * 100 + columns.first.to_i
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    #.##..##.
+    ..#.##.#.
+    ##......#
+    ##......#
+    ..#.##.#.
+    ..##..##.
+    #.#.##.#.
+
+    #...##..#
+    #....#..#
+    ..##..###
+    #####.##.
+    #####.##.
+    ..##..###
+    #....#..#
+  INPUT
+
+  def test_solve_example
+    assert_equal 405, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 33_520, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 400, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 34_824, solve2(read_file('input.txt'))
   end
 end
-
-def parse_input(filename)
-  read_file(filename)
-    .split("\n\n")
-    .map { _1.split("\n").map(&:chars) }
-end
-
-def find_matching(pattern)
-  pattern.map do |line|
-    (1...line.size).select do |inx|
-      left, right = line.partition.with_index { |_, i| i < inx }
-      min_partition = [left.length, right.length].min
-      left.reverse[0...min_partition] == right[0...min_partition]
-    end
-  end.reduce(&:&)
-end
-
-compare_solutions(405, solve('test.txt'))
-puts 'Part1', solve('input.txt')
-
-compare_solutions(400, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
