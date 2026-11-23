@@ -1,30 +1,62 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def pipe_groups(input)
+  graph = input.lines.to_h do |line|
+    id, rest = line.split(' <-> ')
+    [id.to_i, rest.split(',').map(&:to_i)]
+  end
+  unseen = graph.keys.to_set
+  groups = []
+  until unseen.empty?
+    start = unseen.first
+    group = Set[start]
+    stack = [start]
+    graph[stack.pop].each { |n| stack << n if group.add?(n) } until stack.empty?
+    unseen -= group
+    groups << group
+  end
+  groups
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def solve(input)
+  pipe_groups(input).find { |g| g.include?(0) }.size
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve2(input)
+  pipe_groups(input).size
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    0 <-> 2
+    1 <-> 1
+    2 <-> 0, 3, 4
+    3 <-> 2, 4
+    4 <-> 2, 3, 6
+    5 <-> 6
+    6 <-> 4, 5
+  INPUT
+
+  def test_solve_example
+    assert_equal 6, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 134, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 2, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 193, solve2(read_file('input.txt'))
+  end
+end
