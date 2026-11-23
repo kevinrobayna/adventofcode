@@ -1,30 +1,55 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+def trees(grid, right, down)
+  (0...grid.size).step(down).each_with_index.count do |row, i|
+    grid[row][(i * right) % grid[row].size] == '#'
+  end
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def solve(input)
+  trees(input.split, 3, 1)
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve2(input)
+  grid = input.split
+  [[1, 1], [3, 1], [5, 1], [7, 1], [1, 2]].map { |r, d| trees(grid, r, d) }.reduce(:*)
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    ..##.......
+    #...#...#..
+    .#....#..#.
+    ..#.#...#.#
+    .#...##..#.
+    ..#.##.....
+    .#.#.#....#
+    .#........#
+    #.##...#...
+    #...##....#
+    .#..#...#.#
+  INPUT
+
+  def test_solve_example
+    assert_equal 7, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 274, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 336, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 6_050_183_040, solve2(read_file('input.txt'))
+  end
+end
