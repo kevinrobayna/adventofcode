@@ -1,6 +1,6 @@
-# --- Day 12: Passage Pathing ---
+## \-\-\- Day 12: Passage Pathing ---
 
-With your *submarine's subterranean subsystems subsisting suboptimally*, the only way you're getting out of this cave anytime soon is by finding a path yourself. Not just *a* path - the only way to know if you've found the *best* path is to find *all* of them.
+With your submarine's subterranean subsystems subsisting suboptimally, the only way you're getting out of this cave anytime soon is by finding a path yourself. Not just _a_ path - the only way to know if you've found the _best_ path is to find _all_ of them.
 
 Fortunately, the sensors are still mostly working, and so you build a rough map of the remaining caves (your puzzle input). For example:
 
@@ -15,7 +15,7 @@ b-end
 
 ```
 
-This is a list of how all of the caves are connected. You start in the cave named `start`, and your destination is the cave named `end`. An entry like `b-d` means that cave `b` is connected to cave `d` - that is, you can move between them.
+This is a list of how all of the caves are connected. You start in the cave named `start`, and your destination is the cave named `end`. An entry like `b-d` means that cave `b` is connected to cave `d` \- that is, you can move between them.
 
 So, the above cave system looks roughly like this:
 
@@ -28,7 +28,7 @@ c--A-----b--d
 
 ```
 
-Your goal is to find the number of distinct *paths* that start at `start`, end at `end`, and don't visit small caves more than once. There are two types of caves: *big* caves (written in uppercase, like `A`) and *small* caves (written in lowercase, like `b`). It would be a waste of time to visit any small cave more than once, but big caves are large enough that it might be worth visiting them multiple times. So, all paths you find should *visit small caves at most once*, and can *visit big caves any number of times*.
+Your goal is to find the number of distinct _paths_ that start at `start`, end at `end`, and don't visit small caves more than once. There are two types of caves: _big_ caves (written in uppercase, like `A`) and _small_ caves (written in lowercase, like `b`). It would be a waste of time to visit any small cave more than once, but big caves are large enough that it might be worth visiting them multiple times. So, all paths you find should _visit small caves at most once_, and can _visit big caves any number of times_.
 
 Given these rules, there are `10` paths through this example cave system:
 
@@ -115,5 +115,54 @@ start-RW
 
 ```
 
-*How many paths through this cave system are there that visit small caves at most once?*
+_How many paths through this cave system are there that visit small caves at most once?_
 
+## \-\-\- Part Two ---
+
+After reviewing the available paths, you realize you might have time to visit a single small cave _twice_. Specifically, big caves can be visited any number of times, a single small cave can be visited at most twice, and the remaining small caves can be visited at most once. However, the caves named `start` and `end` can only be visited _exactly once each_: once you leave the `start` cave, you may not return to it, and once you reach the `end` cave, the path must end immediately.
+
+Now, the `36` possible paths through the first example above are:
+
+```
+start,A,b,A,b,A,c,A,end
+start,A,b,A,b,A,end
+start,A,b,A,b,end
+start,A,b,A,c,A,b,A,end
+start,A,b,A,c,A,b,end
+start,A,b,A,c,A,c,A,end
+start,A,b,A,c,A,end
+start,A,b,A,end
+start,A,b,d,b,A,c,A,end
+start,A,b,d,b,A,end
+start,A,b,d,b,end
+start,A,b,end
+start,A,c,A,b,A,b,A,end
+start,A,c,A,b,A,b,end
+start,A,c,A,b,A,c,A,end
+start,A,c,A,b,A,end
+start,A,c,A,b,d,b,A,end
+start,A,c,A,b,d,b,end
+start,A,c,A,b,end
+start,A,c,A,c,A,b,A,end
+start,A,c,A,c,A,b,end
+start,A,c,A,c,A,end
+start,A,c,A,end
+start,A,end
+start,b,A,b,A,c,A,end
+start,b,A,b,A,end
+start,b,A,b,end
+start,b,A,c,A,b,A,end
+start,b,A,c,A,b,end
+start,b,A,c,A,c,A,end
+start,b,A,c,A,end
+start,b,A,end
+start,b,d,b,A,c,A,end
+start,b,d,b,A,end
+start,b,d,b,end
+start,b,end
+
+```
+
+The slightly larger example above now has `103` paths through it, and the even larger example now has `3509` paths through it.
+
+Given these new rules, _how many paths through this cave system are there?_
