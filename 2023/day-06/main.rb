@@ -1,46 +1,47 @@
 # frozen_string_literal: true
 
-require 'pry'
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
-end
-
-def solve(filename)
-  input = read_file(filename).lines
-  times = input.first.scan(/\d+/).map(&:to_i)
-  distances = input.last.scan(/\d+/).map(&:to_i)
-
-  calculate_ways(times, distances)
-end
-
-def solve2(filename)
-  input = read_file(filename).lines
-  times = input.first.scan(/\d+/).join.to_i
-  distances = input.last.scan(/\d+/).join.to_i
-
-  calculate_ways([times], [distances])
 end
 
 def calculate_ways(times, distances)
   times.zip(distances).reduce(1) do |acc, (t, d)|
-    ways = (1...t).filter do |hold|
-      (t - hold) * hold > d
-    end
-    acc * ways.length
+    acc * (1...t).count { |hold| (t - hold) * hold > d }
   end
 end
 
-compare_solutions(288, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve(input)
+  times, distances = input.lines.map { it.scan(/\d+/).map(&:to_i) }
+  calculate_ways(times, distances)
+end
 
-compare_solutions(71_503, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+def solve2(input)
+  time, distance = input.lines.map { it.scan(/\d+/).join.to_i }
+  calculate_ways([time], [distance])
+end
+
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    Time:      7  15   30
+    Distance:  9  40  200
+  INPUT
+
+  def test_solve_example
+    assert_equal 288, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 303_600, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 71_503, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 23_654_842, solve2(read_file('input.txt'))
+  end
+end
