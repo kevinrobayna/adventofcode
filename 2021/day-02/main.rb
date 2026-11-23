@@ -1,63 +1,68 @@
 # frozen_string_literal: true
 
-require 'ostruct'
+require 'minitest/autorun'
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
-
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  movement = OpenStruct.new(x: 0, y: 0)
-  parse_content(filename).each do |point|
-    movement.x += point.x
-    movement.y += point.y
+# Each command becomes [dx, dy] where dy is positive going down.
+def parse(input)
+  input.split("\n").map do |line|
+    direction, amount = line.split
+    amount = amount.to_i
+    case direction
+    when 'forward' then [amount, 0]
+    when 'up' then [0, -amount]
+    when 'down' then [0, amount]
+    else raise "Unknown direction #{direction}"
+    end
   end
-  movement.x * movement.y
 end
 
-def solve2(filename)
-  aim = 0
-  depth = 0
-  position = 0
+def solve(input)
+  x = y = 0
+  parse(input).each do |dx, dy|
+    x += dx
+    y += dy
+  end
+  x * y
+end
 
-  parse_content(filename).each do |point|
-    aim += point.y
-    position += point.x
-    depth += (aim * point.x)
+def solve2(input)
+  aim = depth = position = 0
+  parse(input).each do |dx, dy|
+    aim += dy
+    position += dx
+    depth += aim * dx
   end
   position * depth
 end
 
-def parse_content(filename)
-  read_file(filename).split("\n").map do |string|
-    point = OpenStruct.new(x: 0, y: 0)
-    direction = string.split(' ')
-    increase = direction[1].to_i
-    case direction.first
-    when 'forward'
-      point.x = 1 * increase
-    when 'up'
-      point.y = -1 * increase
-    when 'down'
-      point.y = 1 * increase
-    else
-      raise 'Unknown direction'
-    end
-    point
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    forward 5
+    down 5
+    forward 8
+    up 3
+    down 8
+    forward 2
+  INPUT
+
+  def test_solve_example
+    assert_equal 150, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 1_728_414, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 900, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 1_765_720_035, solve2(read_file('input.txt'))
   end
 end
-
-compare_solutions(150, solve('test.txt'))
-puts 'Part1', solve('input.txt')
-
-compare_solutions(900, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
