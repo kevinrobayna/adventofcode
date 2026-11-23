@@ -1,30 +1,51 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+MOVES = { '^' => [0, -1], 'v' => [0, 1], '>' => [1, 0], '<' => [-1, 0] }.freeze
+
+def visit(directions)
+  x = y = 0
+  directions.each_with_object(Set[[0, 0]]) do |char, seen|
+    dx, dy = MOVES.fetch(char)
+    x += dx
+    y += dy
+    seen << [x, y]
+  end
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def solve(input)
+  visit(input.strip.chars).size
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve2(input)
+  santa, robot = input.strip.chars.partition.with_index { |_, i| i.even? }
+  (visit(santa) | visit(robot)).size
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+class AoCTest < Minitest::Test
+  def test_solve_example
+    assert_equal 2, solve('>')
+    assert_equal 4, solve('^>v<')
+    assert_equal 2, solve('^v^v^v^v^v')
+  end
+
+  def test_solve_input
+    assert_equal 2572, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 3, solve2('^v')
+    assert_equal 3, solve2('^>v<')
+    assert_equal 11, solve2('^v^v^v^v^v')
+  end
+
+  def test_solve2_input
+    assert_equal 2631, solve2(read_file('input.txt'))
+  end
+end
