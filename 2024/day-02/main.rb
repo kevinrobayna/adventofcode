@@ -1,71 +1,63 @@
 # frozen_string_literal: true
 
-require 'pry'
 require 'minitest/autorun'
 
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename).lines.map(&:split).count { safe?(_1) }
+def parse(input)
+  input.lines.map { _1.split.map(&:to_i) }
 end
 
-def solve2(filename)
-  read_file(filename).lines.map(&:split).count do |line|
-    without_changes = safe?(line)
-
-    with_changes = line.map.with_index do |_, inx|
-      safe?(line.reject.with_index { |_, i| i == inx })
-    end.any?
-
-    without_changes || with_changes
-  end
+def safe?(levels)
+  diffs = levels.each_cons(2).map { |a, b| b - a }
+  diffs.all? { (1..3).cover?(_1) } || diffs.all? { (-3..-1).cover?(_1) }
 end
 
-def safe?(line)
-  line = line.map(&:to_i)
-  is_sorted = line.sort == line || line.sort.reverse == line
+def solve(input)
+  parse(input).count { safe?(_1) }
+end
 
-  line_check = []
-  array = line.sort.reverse
-  array.each_with_index do |n, inx|
-    next if inx == array.size - 1
-
-    n_plus = array[inx + 1]
-
-    line_check << n - n_plus
+def solve2(input)
+  parse(input).count do |levels|
+    safe?(levels) || levels.each_index.any? { |i| safe?(levels.reject.with_index { |_, j| j == i }) }
   end
-
-  safe_increases = line_check.all? { [1, 2, 3].include?(_1) }
-
-  is_sorted && safe_increases
 end
 
 class AoCTest < Minitest::Test
-  def test_is_safe
-    assert safe?(%w[7 6 4 2 1])
-    assert safe?(%w[1 3 6 7 9])
+  EXAMPLE = <<~INPUT
+    7 6 4 2 1
+    1 2 7 8 9
+    9 7 6 2 1
+    1 3 2 4 5
+    8 6 4 4 1
+    1 3 6 7 9
+  INPUT
+
+  def test_safe
+    assert safe?([7, 6, 4, 2, 1])
+    assert safe?([1, 3, 6, 7, 9])
+    refute safe?([1, 2, 7, 8, 9])
+    refute safe?([9, 7, 6, 2, 1])
+    refute safe?([1, 3, 2, 4, 5])
+    refute safe?([8, 6, 4, 4, 1])
   end
 
-  def test_is_not_safe
-    refute safe?(%w[1 2 7 8 9])
-    refute safe?(%w[9 7 6 2 1])
-    refute safe?(%w[1 3 2 4 5])
-    refute safe?(%w[8 6 4 4 1])
+  def test_solve_example
+    assert_equal 2, solve(EXAMPLE)
   end
 
-  def test_solve
-    assert_equal 2, solve('test.txt')
+  def test_solve_input
+    assert_equal 631, solve(read_file('input.txt'))
   end
 
-  def test_solve2
-    assert_equal 4, solve2('test.txt')
+  def test_solve2_example
+    assert_equal 4, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 665, solve2(read_file('input.txt'))
   end
 end
-
-puts 'Part1', solve('input.txt')
-puts 'Part2', solve2('input.txt')
