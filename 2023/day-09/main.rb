@@ -1,51 +1,52 @@
 # frozen_string_literal: true
 
-require 'pry'
+require 'minitest/autorun'
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
-
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  explore_history(filename).sum { |values| values.reverse.sum(&:last) }
-end
-
-def solve2(filename)
-  explore_history(filename).sum do |values|
-    result = 0
-    (values.length - 2).downto(0).each do |inx|
-      result = values[inx].first - result
-    end
-    result
-  end
-end
-
-def explore_history(filename)
-  read_file(filename).each_line.map { |line| line.split(' ').map(&:to_i) }.map do |current|
+# For each history, the stack of difference rows down to all zeros.
+def explore_history(input)
+  input.each_line.map { |line| line.split.map(&:to_i) }.map do |current|
     values = [current]
-    row = 0
-    until values[row].all?(&:zero?)
-      values << Array.new(values[row].length - 1) do |i|
-        values[row][i + 1] - values[row][i]
-      end
-      row += 1
-    end
+    values << values.last.each_cons(2).map { |a, b| b - a } until values.last.all?(&:zero?)
     values
   end
 end
 
-compare_solutions(114, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve(input)
+  explore_history(input).sum { |values| values.sum(&:last) }
+end
 
-compare_solutions(5, solve2('test2.txt'))
-compare_solutions(2, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+def solve2(input)
+  explore_history(input).sum do |values|
+    values.reverse.reduce(0) { |result, row| row.first - result }
+  end
+end
+
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    0 3 6 9 12 15
+    1 3 6 10 15 21
+    10 13 16 21 30 45
+  INPUT
+
+  def test_solve_example
+    assert_equal 114, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 2_005_352_194, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 5, solve2("10 13 16 21 30 45\n")
+    assert_equal 2, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 1077, solve2(read_file('input.txt'))
+  end
+end
