@@ -1,87 +1,59 @@
 # frozen_string_literal: true
 
-require 'pry'
+require 'minitest/autorun'
 
-class Range
-  def overlaps?(other)
-    cover?(other.first) || other.cover?(first)
-  end
-
-  def intersection(other)
-    return nil if max < other.begin || other.max < self.begin
-
-    [self.begin, other.begin].max..[max, other.end].min
-  end
-
-  alias & intersection
-end
-
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
-
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def parse_file(filename)
-  seeds = []
-  map_info = {}
-  map_key = ''
-  read_file(filename).each_line do |line|
-    if line.match?('seeds:')
-      seeds = line.scan(/\d+/).map(&:to_i)
-    elsif /(.*)\smap:/.match?(line)
-      map_key = line.match(/(.*)\smap:/)[1]
-      map_info[map_key.to_sym] = []
-    elsif /\d+\s\d+\s\d+/.match?(line)
-      dest, orig, range = line.scan(/\d+/).map(&:to_i)
-      map_info[map_key.to_sym] << [orig...(orig + range), dest - orig]
-    elsif map_key != ''
-      sorted = map_info[map_key.to_sym].sort_by { |r, _d| r.begin }
-      min_range = sorted.first.first.begin
-      max_range = sorted.last.first.end
-      sorted.unshift([0...min_range, 0]) unless min_range.zero?
-      sorted << [max_range...1_000_000_000_000, 0]
-
-      map_info[map_key.to_sym] = sorted
-      map_key = ''
-    end
-  end
-  [seeds, map_info]
+def overlaps?(a, b)
+  a.cover?(b.first) || b.cover?(a.first)
 end
 
-def solve(filename)
-  seeds, map_info = parse_file(filename)
+def intersection(a, b)
+  [a.begin, b.begin].max..[a.max, b.end].min
+end
+
+# Returns seeds and, per map, a sorted list of [source_range, delta] covering 0..infinity.
+def parse(input)
+  seeds_block, *blocks = input.split("\n\n")
+  seeds = seeds_block.scan(/\d+/).map(&:to_i)
+  maps = blocks.map do |block|
+    sorted = block.lines.drop(1).map do |line|
+      dest, orig, range = line.scan(/\d+/).map(&:to_i)
+      [orig...(orig + range), dest - orig]
+    end.sort_by { |r, _| r.begin }
+    min_range = sorted.first.first.begin
+    max_range = sorted.last.first.end
+    sorted.unshift([0...min_range, 0]) unless min_range.zero?
+    sorted << [max_range...1_000_000_000_000, 0]
+  end
+  [seeds, maps]
+end
+
+def solve(input)
+  seeds, maps = parse(input)
   seeds.map do |seed|
-    seed_value = seed
-    map_info.each_value do |values|
-      delta = values.filter { |range, _| range.include?(seed_value) }.map(&:last).first || 0
-      seed_value += delta
+    maps.reduce(seed) do |value, ranges|
+      value + (ranges.find { |range, _| range.include?(value) }&.last || 0)
     end
-    seed_value
   end.min
 end
 
-def solve2(filename)
-  seeds, info = parse_file(filename)
-  solution = Array.new(info.keys.length + 1) { Set.new }
+def solve2(input)
+  seeds, maps = parse(input)
+  solution = Array.new(maps.length + 1) { Set.new }
   seeds.each_slice(2) do |seed_start, len|
-    seed_range = (seed_start...(seed_start + len))
-    solution[0] << seed_range
+    solution[0] << (seed_start...(seed_start + len))
 
-    info.values.each_with_index do |values, inx|
+    maps.each_with_index do |ranges, inx|
       solution[inx].each do |range|
-        solution[inx + 1] += values.filter_map do |rng, delta|
-          if rng.overlaps?(range)
-            better_range = (rng & range)
-            ((better_range.begin + delta)...(better_range.end + delta))
-          end
+        solution[inx + 1] += ranges.filter_map do |rng, delta|
+          next unless overlaps?(rng, range)
+
+          better_range = intersection(rng, range)
+          (better_range.begin + delta)...(better_range.end + delta)
         end
       end
     end
@@ -90,8 +62,56 @@ def solve2(filename)
   solution.last.map(&:begin).min
 end
 
-compare_solutions(35, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+class AoCTest < Minitest::Test
+  EXAMPLE = <<~INPUT
+    seeds: 79 14 55 13
 
-compare_solutions(46, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+    seed-to-soil map:
+    50 98 2
+    52 50 48
+
+    soil-to-fertilizer map:
+    0 15 37
+    37 52 2
+    39 0 15
+
+    fertilizer-to-water map:
+    49 53 8
+    0 11 42
+    42 0 7
+    57 7 4
+
+    water-to-light map:
+    88 18 7
+    18 25 70
+
+    light-to-temperature map:
+    45 77 23
+    81 45 19
+    68 64 13
+
+    temperature-to-humidity map:
+    0 69 1
+    1 0 69
+
+    humidity-to-location map:
+    60 56 37
+    56 93 4
+  INPUT
+
+  def test_solve_example
+    assert_equal 35, solve(EXAMPLE)
+  end
+
+  def test_solve_input
+    assert_equal 175_622_908, solve(read_file('input.txt'))
+  end
+
+  def test_solve2_example
+    assert_equal 46, solve2(EXAMPLE)
+  end
+
+  def test_solve2_input
+    assert_equal 5_200_543, solve2(read_file('input.txt'))
+  end
+end
