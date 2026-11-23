@@ -1,30 +1,50 @@
 # frozen_string_literal: true
 
-def compare_solutions(expected, actual)
-  raise "Expected #{expected} but got #{actual}" unless expected == actual
+require 'minitest/autorun'
 
-  puts "Congratulations! Got expected result (#{expected})"
-end
-
+# Reads a file that lives next to this solution.
 def read_file(filename)
-  # Get the directory of the currently executing script
-  # Join the script directory with the filename
-  # Read the content of the file
   File.read(File.join(__dir__, filename))
 end
 
-def solve(filename)
-  read_file(filename)
-  0
+STRAIGHTS = Regexp.union(('a'..'x').map { |c| c + c.next + c.next.next })
+
+def valid_password?(password)
+  password.match?(STRAIGHTS) && !password.match?(/[iol]/) && password.scan(/(.)\1/).uniq.size >= 2
 end
 
-def solve2(filename)
-  read_file(filename)
-  0
+def next_password(password)
+  password = password.strip.succ
+  password = password.succ until valid_password?(password)
+  password
 end
 
-compare_solutions(0, solve('test.txt'))
-puts 'Part1', solve('input.txt')
+def solve(input)
+  next_password(input)
+end
 
-compare_solutions(0, solve2('test.txt'))
-puts 'Part2', solve2('input.txt')
+def solve2(input)
+  next_password(next_password(input))
+end
+
+class AoCTest < Minitest::Test
+  def test_valid_password
+    refute valid_password?('hijklmmn')
+    refute valid_password?('abbceffg')
+    refute valid_password?('abbcegjk')
+    assert valid_password?('abcdffaa')
+  end
+
+  def test_solve_example
+    assert_equal 'abcdffaa', solve('abcdefgh')
+    assert_equal 'ghjaabcc', solve('ghijklmn')
+  end
+
+  def test_solve_input
+    assert_equal 'hxbxxyzz', solve(read_file('input.txt'))
+  end
+
+  def test_solve2_input
+    assert_equal 'hxcaabcc', solve2(read_file('input.txt'))
+  end
+end
